@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace StocksAndBonds.Console.Models
+﻿namespace Library.Models
 {
     public class PurchasedSecurity
     {

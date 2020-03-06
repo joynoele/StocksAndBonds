@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace StocksAndBonds.Console.Models
+namespace Library.Models
 {
     public class Player
     {
@@ -88,9 +87,9 @@ namespace StocksAndBonds.Console.Models
             int yieldTotal = 0;
             foreach (var s in OwnedSecurities)
             {
-                if (s.Security.Yield > 0 && s.Quantity > 0)
+                if (s.Security.YieldPer10Shares > 0 && s.Quantity > 0)
                 {
-                    yieldTotal += s.Quantity * s.Security.Yield;
+                    yieldTotal += s.Quantity * s.Security.YieldPer10Shares;
                 }
             }
 
@@ -101,3 +100,4 @@ namespace StocksAndBonds.Console.Models
 
     }
 }
+

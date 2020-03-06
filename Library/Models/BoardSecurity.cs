@@ -1,13 +1,13 @@
 ﻿using System.Collections.Generic;
 
-namespace StocksAndBonds.Console.Models
+namespace Library.Models
 {
 
     public class BoardSecurity
     {
         public int CostPerShare { get; private set; }
         public bool IsSplit = false;
-        public Security Security { get; }
+        public Security Security { get; set; }
         public int CostChange { get; private set; }
 
         private Dictionary<int, int> _bearChange;
