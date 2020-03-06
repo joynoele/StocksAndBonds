@@ -1,9 +1,26 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace Library.Models
+namespace Library.Models.Players
 {
-    public class Player
+    public interface IPlayer
+    {
+        string Name { get; }
+        int Balance { get; }
+        IList<PurchasedSecurity> OwnedSecurities { get; }
+
+        void AddYield();
+        void PrintStatus();
+        int CashOut(Board board);
+
+        void Buy(BoardSecurity purchaseSecurity, int purchaseQuantity);
+        int MaxBuy(BoardSecurity purchaseSecurity);
+        void Sell(BoardSecurity sellingSecurity);
+        void Sell(BoardSecurity sellingSecurity, int sellQuantity);
+        void SellAll(IList<BoardSecurity> sellingSecurities);
+    }
+
+    public abstract class Player : IPlayer
     {
         public int Balance { get; private set; }
         public string Name { get; }
@@ -16,9 +33,35 @@ namespace Library.Models
             OwnedSecurities = SecurityFactory.InitializePlayerPortfolio();
         }
 
+        public void PrintStatus()
+        {
+            System.Console.WriteLine($"{this.Name}: ${this.Balance}");
+            foreach (PurchasedSecurity myPortfolio in this.OwnedSecurities)
+            {
+                if (myPortfolio.Quantity > 0)
+                    System.Console.WriteLine($"\t{myPortfolio.Security.Name}\t{myPortfolio.Quantity} shares");
+            }
+        }
+
+        public void AddYield()
+        {
+            int yieldTotal = 0;
+            foreach (var s in OwnedSecurities)
+            {
+                if (s.Security.YieldPer10Shares > 0 && s.Quantity > 0)
+                {
+                    yieldTotal += s.Quantity * s.Security.YieldPer10Shares;
+                }
+            }
+
+            Balance += yieldTotal;
+            if (yieldTotal > 0)
+                System.Console.WriteLine($"{Name} received ${yieldTotal} in yield!");
+        }
+
         public int MaxBuy(BoardSecurity purchaseSecurity)
         {
-            int affordableShares = ((Balance / (purchaseSecurity.CostPerShare)/10)*10); // TODO: technically this should be only in groups of 10
+            int affordableShares = ((Balance / (purchaseSecurity.CostPerShare) / 10) * 10); // TODO: technically this should be only in groups of 10
             Buy(purchaseSecurity, affordableShares);
             return affordableShares;
         }
@@ -72,32 +115,11 @@ namespace Library.Models
                 System.Console.WriteLine($"{Name} sold {sellQuantity} shares of {sellingSecurity.Security.Name} for {sellingSecurity.CostPerShare * sellQuantity}");
         }
 
-        public void PrintStatus()
+        public int CashOut(Board board)
         {
-            System.Console.WriteLine($"{this.Name}: ${this.Balance}");
-            foreach (PurchasedSecurity myPortfolio in this.OwnedSecurities)
-            {
-                if (myPortfolio.Quantity > 0)
-                    System.Console.WriteLine($"\t{myPortfolio.Security.Name}\t{myPortfolio.Quantity} shares");
-            }
+            SellAll(board.BoardSecurities);
+            return Balance;
         }
-
-        public void AddYield()
-        {
-            int yieldTotal = 0;
-            foreach (var s in OwnedSecurities)
-            {
-                if (s.Security.YieldPer10Shares > 0 && s.Quantity > 0)
-                {
-                    yieldTotal += s.Quantity * s.Security.YieldPer10Shares;
-                }
-            }
-
-            Balance += yieldTotal;
-            if (yieldTotal > 0)
-                System.Console.WriteLine($"{Name} received ${yieldTotal} in yield!");
-        }
-
     }
 }
 

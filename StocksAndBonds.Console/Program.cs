@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.Linq;
 using System.Security;
+using Library.Models.Players;
 
 namespace StocksAndBonds.Console
 {
@@ -27,18 +28,18 @@ namespace StocksAndBonds.Console
             System.Console.WriteLine("Ready???\n");
             System.Console.ReadLine();
 
-            GameSimulation game = new GameSimulation(MaxYears, players, GameBoard, new Random());
-            game.PlayGame();
+            GameSimulation game = new GameSimulation(MaxYears, GameBoard, new Random());
+            game.PlayAiSimulation(players);
 
             System.Console.ReadLine();
         }
 
-        private static IList<Player> InitializePlayers()
+        private static IList<IAiPlayer> InitializePlayers()
         {
-            var player1 = new Player("LowDilbert", DefaultStartingBalance);
-            var player2 = new Player("GrowthDilbert", DefaultStartingBalance);
-            var player3 = new Player("YieldDilbert", DefaultStartingBalance);
-            return new List<Player>(){player1, player2, player3};
+            var player1 = new LowCostAi(DefaultStartingBalance);
+            var player2 = new MostChangedAi(DefaultStartingBalance);
+            var player3 = new YieldAi(DefaultStartingBalance);
+            return new List<IAiPlayer>() { player1, player2, player3 };
         }
     }
 }

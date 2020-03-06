@@ -1,4 +1,5 @@
 ﻿using Library.Models;
+using Library.Models.Players;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,18 +14,16 @@ namespace Library
         private bool _isBear => _marketRoll % 2 == 1;
         private bool _isBull => _marketRoll % 2 == 0; // added for completeness
         private Random _die;
-        private IList<Player> _players;
         private Board _board;
 
-        public GameSimulation(int years, IList<Player> players, Board board, Random die)
+        public GameSimulation(int years, Board board, Random die)
         {
             _maxYears = years;
-            _players = players;
             _board = board;
             _die = die;
         }
 
-        public void PlayGame()
+        public void PlayAiSimulation(IList<IAiPlayer> players)
         {
             int year = 1;
             for (; year <= _maxYears; year++)
@@ -36,42 +35,32 @@ namespace Library
                 _board.SetupNextYear(_isBear, d6);
                 _board.PrintBoard();
                 System.Console.WriteLine($"--------------");
-                /**
-                 * Time for players to play
-                 * Fill out with some AI later.
-                 */
-                // Player1
-                _players[0].SellAll(_board.BoardSecurities);
-                var lowestCostSecurity = _board.BoardSecurities.OrderBy(s => s.CostPerShare).First();
-                _players[0].MaxBuy(lowestCostSecurity);
-                _players[0].AddYield();
-                // Player2
-                _players[1].SellAll(_board.BoardSecurities);
-                var highestGrowthSecurity = _board.BoardSecurities.OrderByDescending(s => s.CostChange).First();
-                _players[1].MaxBuy(highestGrowthSecurity);
-                _players[1].AddYield();
-                // Player2
-                _players[2].SellAll(_board.BoardSecurities);
-                var mostYield = _board.BoardSecurities.OrderByDescending(s => s.Security.YieldPer10Shares).First();
-                _players[2].MaxBuy(mostYield);
-                _players[2].AddYield();
-                /*****/
+
+                foreach (var ai in players)
+                {
+                    ai.TakeTurn(_board);
+                }
+
+                foreach (var ai in players)
+                {
+                    ai.AddYield();
+                }
 
                 System.Console.WriteLine();
-                foreach (var player in _players)
+                foreach (var player in players)
                 {
                     player.PrintStatus();
                 }
 
                 System.Console.ReadLine();
             }
-            foreach (var player in _players)
+            foreach (var player in players)
             {
-                player.SellAll(_board.BoardSecurities);
+                player.CashOut(_board);
             }
 
             System.Console.WriteLine($"======= GAME OVER ======");
-            PrintPlayerWinners();
+            PrintPlayerWinners(players);
         }
 
         private int RollD6(int quantity = 1)
@@ -85,11 +74,11 @@ namespace Library
             return rollSum;
         }
 
-        private void PrintPlayerWinners()
+        private void PrintPlayerWinners(IList<IAiPlayer> players)
         {
-            var winner = _players.OrderByDescending(p => p.Balance).First();
-            System.Console.WriteLine($"{winner.Name} won with ${winner.Balance}");
-            var losers = _players.OrderByDescending(p => p.Balance).Skip(1);
+            var winner = players.OrderByDescending(p => p.Balance).First();
+            Console.WriteLine($"{winner.Name} won with ${winner.Balance}");
+            var losers = players.OrderByDescending(p => p.Balance).Skip(1);
             foreach (var l in losers)
             {
                 System.Console.WriteLine($"{l.Name}: ${l.Balance}");
