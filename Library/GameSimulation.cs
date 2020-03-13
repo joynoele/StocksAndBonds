@@ -10,13 +10,10 @@ namespace Library
     public class GameSimulation
     {
         private readonly int _maxYears;
-        private int _marketRoll;
-        private bool _isBear => _marketRoll % 2 == 1;
-        private bool _isBull => _marketRoll % 2 == 0; // added for completeness
         private Random _die;
-        private Board _board;
+        private StockBoard _board;
 
-        public GameSimulation(int years, Board board, Random die)
+        public GameSimulation(int years, StockBoard board, Random die)
         {
             _maxYears = years;
             _board = board;
@@ -28,47 +25,57 @@ namespace Library
             int year = 1;
             for (; year <= _maxYears; year++)
             {
-                System.Console.WriteLine($"\n======= YEAR {year} of {_maxYears} ======");
-                _marketRoll = RollD6();
-                var d6 = RollD6(2);
-                System.Console.WriteLine($"Rolled {d6} on " + (_isBear ? " BEAR marketRoll" : "BULL marketRoll"));
-                _board.SetupNextYear(_isBear, d6);
-                _board.PrintBoard();
-                System.Console.WriteLine($"--------------");
-
-                foreach (var ai in players)
-                {
-                    ai.TakeTurn(_board);
-                }
-
+                Console.WriteLine($"\n======= YEAR {year} of {_maxYears} ======");
+                // Collect Yield (if any)
                 foreach (var ai in players)
                 {
                     ai.AddYield();
                 }
 
-                System.Console.WriteLine();
+                // Setup board
+                var tempRoll = RollD6(2);
+                _board.AdvanceYear(RollD6(1), tempRoll);
+                Console.WriteLine($"Rolled {tempRoll} on {_board.BoardMarket} market");
+                foreach(var boardSecurity in _board.BoardSecurities.Where(b => b.IsSplit))
+                { foreach(var player in players)
+                    {
+                        player.SplitOwnedSecurity(boardSecurity.Security);
+                    }
+                    Console.WriteLine($"{boardSecurity.Security.Name} split!");  }
+                _board.PrintBoard();
+                Console.WriteLine($"--------------");
+
+                // Take Turns
+                foreach (var ai in players)
+                {
+                    ai.TakeTurn(_board.BoardSecurities);
+                }
+
+                // Print round end summary
+                Console.WriteLine();
                 foreach (var player in players)
                 {
+                    Console.Write($"({player.TotalWealth(_board.BoardSecurities)}) ");
                     player.PrintStatus();
                 }
 
-                System.Console.ReadLine();
+                Console.ReadLine();
             }
             foreach (var player in players)
             {
-                player.CashOut(_board);
+                player.CashOut(_board.BoardSecurities);
             }
 
-            System.Console.WriteLine($"======= GAME OVER ======");
+            Console.WriteLine($"======= GAME OVER ======");
             PrintPlayerWinners(players);
         }
 
         private int RollD6(int quantity = 1)
         {
             var rollSum = 0;
-            for (int i = 0; i <= quantity; i++)
+            for (int i = 0; i < quantity; i++)
             {
-                rollSum += _die.Next(1, 6);
+                rollSum  += _die.Next(1, 6);
             }
 
             return rollSum;
@@ -81,7 +88,7 @@ namespace Library
             var losers = players.OrderByDescending(p => p.Balance).Skip(1);
             foreach (var l in losers)
             {
-                System.Console.WriteLine($"{l.Name}: ${l.Balance}");
+                Console.WriteLine($"{l.Name}: ${l.Balance}");
             }
         }
     }

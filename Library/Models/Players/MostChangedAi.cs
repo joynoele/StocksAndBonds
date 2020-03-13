@@ -11,17 +11,37 @@ namespace Library.Models.Players
         {
         }
 
-        public void TakeTurn(Board board)
+        public void TakeTurn(IList<BoardSecurity> securities)
         {
-            // sell everything
-            SellAll(board.BoardSecurities);
-            // buy the thing that changed the most (in the positive direction)
-            MaxBuy(MostChanged(board.BoardSecurities));
+            var securitiesByGrowth = BiggestIncrease(securities);
+            bool didBuy = false;
+
+            // Can I buy anything with current balance?
+            foreach (var security in securitiesByGrowth)
+            {
+                if (MaxBuy(security) > 0)
+                    didBuy = true;
+            }
+            if (didBuy) return;
+
+            // If I sell everything, can I get more shares of the next best growth?
+            foreach (var security in securitiesByGrowth)
+            {
+                var currentShareQuantity = Portfolio.First(p => p.Security == security.Security).Quantity;
+                var costPerBundle = security.CostPerShare * 10;
+                var bundlesCanAfford = Balance / costPerBundle;
+
+                if (bundlesCanAfford > 10 && bundlesCanAfford * 10 > currentShareQuantity)
+                {
+                    SellAll(securities);
+                    MaxBuy(security);
+                }
+            }
         }
 
-        private BoardSecurity MostChanged(IList<BoardSecurity> boardSecurities)
+        private List<BoardSecurity> BiggestIncrease(IList<BoardSecurity> boardSecurities)
         {
-            return boardSecurities.OrderByDescending(s => s.CostChange).First();
+            return boardSecurities.OrderByDescending(s => s.CostChange).Where(s2 => s2.CostPerShare > 0).ToList();
         }
     }
 }

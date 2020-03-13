@@ -5,10 +5,10 @@
         public Security Security { get; }
         public int Quantity { get; set; }
 
-        public PurchasedSecurity(Security security)
+        public PurchasedSecurity(Security security, int quantity = 0)
         {
             Security = security;
-            Quantity = 0;
+            Quantity = quantity;
         }
     }
 }

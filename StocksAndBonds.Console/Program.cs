@@ -18,14 +18,14 @@ namespace StocksAndBonds.Console
         {
             SecurityFactory.LoadSecurities("C:\\Repo\\StocksAndBonds\\securities.json");
             var players = InitializePlayers();
-            Board GameBoard = new Board(SecurityFactory.BoardSecurities);
+            StockBoard GameBoard = new StockBoard(SecurityFactory.BoardSecurities);
 
             System.Console.WriteLine("===== Starting simulation of 'Stocks & Bonds' =====");
             foreach (var player in players)
             {
                 System.Console.WriteLine($"Welcome {player.Name}!");
             }
-            System.Console.WriteLine("Ready???\n");
+            System.Console.WriteLine("Ready???");
             System.Console.ReadLine();
 
             GameSimulation game = new GameSimulation(MaxYears, GameBoard, new Random());
@@ -36,7 +36,7 @@ namespace StocksAndBonds.Console
 
         private static IList<IAiPlayer> InitializePlayers()
         {
-            var player1 = new LowCostAi(DefaultStartingBalance);
+            var player1 = new MostSharesAi(DefaultStartingBalance);
             var player2 = new MostChangedAi(DefaultStartingBalance);
             var player3 = new YieldAi(DefaultStartingBalance);
             return new List<IAiPlayer>() { player1, player2, player3 };

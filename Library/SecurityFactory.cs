@@ -62,7 +62,8 @@ namespace Library
 
             foreach (var o in fromJson)
             {
-                var s = new Security(-1, o.Name, (int)o.Yield * 1000);
+                var yield = o.Yield*100; // because yields are expressed in percents
+                var s = new Security(-1, o.Name, (int)yield);
                 var b = new BoardSecurity(s, o.BearChanges, o.BullChanges);
                 _securities.Add(s);
                 _boardSecurities.Add(b);
@@ -79,9 +80,9 @@ namespace Library
             return emptyPortfolio;
         }
 
-        public static Board CreateGameBoard()
+        public static StockBoard CreateGameBoard()
         {
-            return new Board(_boardSecurities);
+            return new StockBoard(_boardSecurities);
         }
     }
 }

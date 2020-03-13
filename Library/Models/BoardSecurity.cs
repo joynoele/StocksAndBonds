@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Library.Models
 {
@@ -21,14 +22,13 @@ namespace Library.Models
             _bullChange = bullChange;
         }
 
-        public void AdjustPrice(bool isBearMarket, int diceRoll)
+        public void AdjustPrice(MarketDirection direction, int diceRoll)
         {
             // Reset the split before calculating the next price
-            if (IsSplit)
-                IsSplit = false; 
+            IsSplit = false;
 
-            int changeValue = 0;
-            if (isBearMarket)
+            int changeValue;
+            if (direction .Equals(MarketDirection.Bear))
             {
                 _bearChange.TryGetValue(diceRoll, out changeValue);
             }
@@ -36,17 +36,24 @@ namespace Library.Models
             {
                 _bullChange.TryGetValue(diceRoll, out changeValue);
             }
-            CostPerShare += changeValue;
-            if (CostPerShare >= 150)
+
+            // cost per share may not fall below 0
+            if (CostPerShare + changeValue < 0)
             {
-                CostPerShare = CostPerShare / 2; // integer division for now
-                IsSplit = true;
+                CostChange = -(CostPerShare);
+                CostPerShare = 0;
             }
-
-            CostChange = changeValue;
+            else
+            {
+                CostPerShare += changeValue;
+                if (CostPerShare >= 150)
+                {
+                    CostPerShare /= 2; // Round to nearest whole number
+                    IsSplit = true;
+                }
+                CostChange = changeValue;
+            }
         }
-
-        // TODO: add method for card changes
     }
 
 }
