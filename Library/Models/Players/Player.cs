@@ -6,20 +6,23 @@ namespace Library.Models.Players
     public interface IPlayer
     {
         string Name { get; }
+        string Strategy { get; }
         int Balance { get; }
         IList<PurchasedSecurity> Portfolio { get; }
         
         int TotalWealth(IList<BoardSecurity> securities);
-        void AddYield();
+        void AddYield(IList<BoardSecurity> securities);
         void PrintStatus();
         int CashOut(IList<BoardSecurity> securities);
         void SplitOwnedSecurity(Security security);
+        void ForfitSunkSecurity(Security security);
     }
 
     public abstract class Player : IPlayer
     {
         public int Balance { get; private set; }
         public string Name { get; }
+        public string Strategy { get; }
         public IList<PurchasedSecurity> Portfolio { get; }
         public int TotalWealth(IList<BoardSecurity> securities)
         {
@@ -32,9 +35,10 @@ namespace Library.Models.Players
         }
 
 
-        public Player(string name, int initialBalance)
+        public Player(string name, int initialBalance, string strategy)
         {
             Name = name;
+            Strategy = string.IsNullOrWhiteSpace(strategy) ? "...silent waters run deep" : strategy;
             Balance = initialBalance;
             Portfolio = SecurityFactory.InitializePlayerPortfolio();
         }
@@ -49,12 +53,15 @@ namespace Library.Models.Players
             }
         }
 
-        public void AddYield()
+        public void AddYield(IList<BoardSecurity> boardSecurities)
         {
             foreach (var s in Portfolio)
             {
-                // Technically, there is also a rule you cannot collect yield on 
-                // securities that fall below a certain price... ignoring for now
+                if (boardSecurities.First(b => b.Security.Name == s.Security.Name).CostPerShare <= 30)
+                {
+                    continue; // Securities that fall below a certain value ($30?) cannot have yield collected on them
+                }
+
                 if (s.Security.YieldPer10Shares > 0 && s.Quantity > 0)
                 {
                     var yield = s.Quantity * s.Security.YieldPer10Shares;
@@ -66,6 +73,8 @@ namespace Library.Models.Players
 
         protected int MaxBuy(BoardSecurity purchaseSecurity)
         {
+            if (purchaseSecurity.CostPerShare <= 0) return 0; // cannot purchase shares that have $0 valuation
+
             int affordableShares = Balance / (purchaseSecurity.CostPerShare);
             Buy(purchaseSecurity, affordableShares / 10);
             return affordableShares;
@@ -78,6 +87,8 @@ namespace Library.Models.Players
         /// <param name="purchaseBundle">Set of 10</param>
         protected void Buy(BoardSecurity purchaseSecurity, int purchaseBundle)
         {
+            if (purchaseSecurity.CostPerShare <= 0) return; // cannot purchase shares that have $0 valuation
+
             var purchaseVolume = purchaseBundle * 10;
             var cost = purchaseSecurity.CostPerShare * purchaseVolume;
             if (cost > Balance)
@@ -106,7 +117,6 @@ namespace Library.Models.Players
         }
         protected void Sell(BoardSecurity sellingSecurity)
         {
-            // TODO: check if we have this security at all
             var sellQuantity = Portfolio.First(x => x.Security == sellingSecurity.Security).Quantity;
             Sell(sellingSecurity, sellQuantity);
         }
@@ -136,6 +146,11 @@ namespace Library.Models.Players
         public void SplitOwnedSecurity(Security security)
         {
             Portfolio.First(s => s.Security == security).Quantity *= 2;
+        }
+
+        public void ForfitSunkSecurity(Security security)
+        {
+            Portfolio.First(s => s.Security == security).Quantity = 0;
         }
     }
 }

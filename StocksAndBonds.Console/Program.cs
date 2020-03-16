@@ -12,18 +12,18 @@ namespace StocksAndBonds.Console
     public class Program
     {
         private static readonly int DefaultStartingBalance = 5000;
-        private static int MaxYears = 10;
+        private static int MaxYears = 25;
 
         public static void Main(string[] args)
         {
-            SecurityFactory.LoadSecurities("C:\\Repo\\StocksAndBonds\\securities.json");
+            SecurityFactory.LoadSecurities("..\\..\\..\\..\\securities.json");
             var players = InitializePlayers();
             StockBoard GameBoard = new StockBoard(SecurityFactory.BoardSecurities);
 
             System.Console.WriteLine("===== Starting simulation of 'Stocks & Bonds' =====");
             foreach (var player in players)
             {
-                System.Console.WriteLine($"Welcome {player.Name}!");
+                System.Console.WriteLine($"Welcome {player.Name}! `{player.Strategy}`");
             }
             System.Console.WriteLine("Ready???");
             System.Console.ReadLine();
@@ -37,7 +37,7 @@ namespace StocksAndBonds.Console
         private static IList<IAiPlayer> InitializePlayers()
         {
             var player1 = new MostSharesAi(DefaultStartingBalance);
-            var player2 = new MostChangedAi(DefaultStartingBalance);
+            var player2 = new SteadyGrowthAi(DefaultStartingBalance);
             var player3 = new YieldAi(DefaultStartingBalance);
             return new List<IAiPlayer>() { player1, player2, player3 };
         }

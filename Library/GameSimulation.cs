@@ -26,22 +26,30 @@ namespace Library
             for (; year <= _maxYears; year++)
             {
                 Console.WriteLine($"\n======= YEAR {year} of {_maxYears} ======");
-                // Collect Yield (if any)
+                // Collect Yield (if any) - 
+                // TODO: check if this happen at the beginning or the end of the turn
                 foreach (var ai in players)
                 {
-                    ai.AddYield();
+                    ai.AddYield(_board.BoardSecurities);
                 }
 
-                // Setup board
+                // Setup board for next year
                 var tempRoll = RollD6(2);
                 _board.AdvanceYear(RollD6(1), tempRoll);
                 Console.WriteLine($"Rolled {tempRoll} on {_board.BoardMarket} market");
-                foreach(var boardSecurity in _board.BoardSecurities.Where(b => b.IsSplit))
-                { foreach(var player in players)
+                foreach (var boardSecurity in _board.BoardSecurities)
+                {
+                    if (boardSecurity.IsSplit)
                     {
-                        player.SplitOwnedSecurity(boardSecurity.Security);
+                        Console.WriteLine($"{boardSecurity.Security.Name} split!");
+                        foreach (var player in players) { player.SplitOwnedSecurity(boardSecurity.Security); }
                     }
-                    Console.WriteLine($"{boardSecurity.Security.Name} split!");  }
+                    if (boardSecurity.CostPerShare <= 0)
+                    {
+                        Console.WriteLine($"{boardSecurity.Security.Name} sunk!");
+                        foreach (var player in players) { player.ForfitSunkSecurity(boardSecurity.Security); }
+                    }
+                }
                 _board.PrintBoard();
                 Console.WriteLine($"--------------");
 
@@ -75,7 +83,7 @@ namespace Library
             var rollSum = 0;
             for (int i = 0; i < quantity; i++)
             {
-                rollSum  += _die.Next(1, 6);
+                rollSum += _die.Next(1, 6);
             }
 
             return rollSum;

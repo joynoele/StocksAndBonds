@@ -7,7 +7,8 @@ namespace Library.Models.Players
 {
     public class YieldAi : Player, IAiPlayer
     {
-        public YieldAi(int initialBalance) : base("YieldDilbert", initialBalance)
+        private static string strategy = "Money make mo' money";
+        public YieldAi(int initialBalance) : base("YieldDilbert", initialBalance, strategy)
         {
         }
 
@@ -41,7 +42,8 @@ namespace Library.Models.Players
 
         private IList<BoardSecurity> MostYield(IList<BoardSecurity> boardSecurities)
         {
-            return boardSecurities.OrderByDescending(s => s.Security.YieldPer10Shares).Where(s2 => s2.CostPerShare > 0).ToList();
+            // Only look at securities that haven't fallen below the threshold where yield cannot be collected
+            return boardSecurities.OrderByDescending(s => s.Security.YieldPer10Shares).Where(s2 => s2.CostPerShare > 30).ToList();
         }
     }
 }

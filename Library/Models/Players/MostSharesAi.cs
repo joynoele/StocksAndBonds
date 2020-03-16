@@ -7,7 +7,8 @@ namespace Library.Models.Players
 {
     public class MostSharesAi : Player, IAiPlayer
     {
-        public MostSharesAi(int initialBalance) : base("MostSharesDilbert", initialBalance)
+        private static string strategy = "Hostess with the mostess";
+        public MostSharesAi(int initialBalance) : base("MostSharesDilbert", initialBalance, strategy)
         {
         }
 
