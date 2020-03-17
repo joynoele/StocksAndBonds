@@ -44,6 +44,8 @@ namespace StocksAndBonds.Console
             foreach (var index in SecurityFactory.BoardSecurities)
             {
                 players.Add(new IndexAi(DefaultStartingBalance, index.Security, false));
+                if (index.Security.YieldPer10Shares > 0)
+                    players.Add(new IndexAi(DefaultStartingBalance, index.Security, true));
             }
 
             return players;

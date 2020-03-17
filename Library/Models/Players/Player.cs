@@ -49,7 +49,7 @@ namespace Library.Models.Players
             foreach (PurchasedSecurity myPortfolio in this.Portfolio)
             {
                 if (myPortfolio.Quantity > 0)
-                    System.Console.WriteLine($"\t{myPortfolio.Security.Name}\t{myPortfolio.Quantity} shares");
+                    System.Console.WriteLine($"\t{myPortfolio.Security}\t{myPortfolio.Quantity} shares");
             }
         }
 
@@ -65,7 +65,7 @@ namespace Library.Models.Players
                 if (s.Security.YieldPer10Shares > 0 && s.Quantity > 0)
                 {
                     var yield = s.Quantity * s.Security.YieldPer10Shares;
-                    System.Console.WriteLine($"{Name} received ${yield} in yield for {s.Quantity} shares of {s.Security.Name}!");
+                    System.Console.WriteLine($"{Name} received ${yield} in yield for {s.Quantity} shares of {s.Security}!");
                     Balance += yield;
                 }
             }
@@ -104,7 +104,7 @@ namespace Library.Models.Players
             Balance -= cost;
 
             if (purchaseVolume > 0)
-                System.Console.WriteLine($"{Name} purchased {purchaseVolume} shares of {purchaseSecurity.Security.Name} for {cost}");
+                System.Console.WriteLine($"{Name} purchased {purchaseVolume} shares of {purchaseSecurity.Security} for {cost}");
 
         }
 
@@ -134,7 +134,7 @@ namespace Library.Models.Players
             Balance += sellingSecurity.CostPerShare * sellQuantity;
 
             if (sellQuantity > 0)
-                System.Console.WriteLine($"{Name} sold {sellQuantity} shares of {sellingSecurity.Security.Name} for {sellingSecurity.CostPerShare * sellQuantity}");
+                System.Console.WriteLine($"{Name} sold {sellQuantity} shares of {sellingSecurity.Security} for {sellingSecurity.CostPerShare * sellQuantity}");
         }
 
         public int CashOut(IList<BoardSecurity> securities)

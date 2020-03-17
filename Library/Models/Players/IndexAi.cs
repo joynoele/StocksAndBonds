@@ -11,7 +11,7 @@ namespace Library.Models.Players
         public Security IndexSecurity { get; private set; }
         public bool Reinvest { get; private set; }
 
-        public IndexAi(int initialBalance, Security index, bool reinvest) : base("IndexDilbert-" + index.Name, initialBalance, strategy)
+        public IndexAi(int initialBalance, Security index, bool reinvest) : base("Index-" + index + (reinvest ? "-reinvest" : ""), initialBalance, strategy)
         {
             IndexSecurity = index;
             Reinvest = reinvest;

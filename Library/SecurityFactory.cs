@@ -9,6 +9,7 @@ namespace Library
     public class RawSecurities
     {
         public string Name { get; set; }
+        public string ShortName { get; set; }
         public decimal Yield { get; set; } // Percent per 10 shares. i.e. 0.02 = 2% = $20
         public Dictionary<int, int> BullChanges { get; set; }
         public Dictionary<int, int> BearChanges { get; set; }
@@ -62,7 +63,7 @@ namespace Library
             foreach (var @object in fromJson)
             {
                 var yield = @object.Yield*100; // because yields are expressed in percents
-                var security = new Security(Guid.NewGuid(), @object.Name, (int)yield);
+                var security = new Security(Guid.NewGuid(), @object.Name, @object.ShortName, (int)yield);
                 var boardSecurity = new BoardSecurity(security, @object.BearChanges, @object.BullChanges);
                 _securities.Add(security);
                 _boardSecurities.Add(boardSecurity);

@@ -41,12 +41,12 @@ namespace Library
                 {
                     if (boardSecurity.IsSplit)
                     {
-                        Console.WriteLine($"{boardSecurity.Security.Name} split!");
+                        Console.WriteLine($"{boardSecurity.Security} split!");
                         foreach (var player in players) { player.SplitOwnedSecurity(boardSecurity.Security); }
                     }
                     if (boardSecurity.CostPerShare <= 0)
                     {
-                        Console.WriteLine($"{boardSecurity.Security.Name} sunk!");
+                        Console.WriteLine($"{boardSecurity.Security} sunk!");
                         foreach (var player in players) { player.ForfitSunkSecurity(boardSecurity.Security); }
                     }
                 }

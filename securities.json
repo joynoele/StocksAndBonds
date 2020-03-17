@@ -1,6 +1,7 @@
 [
   {
     "Name": "Central City Municipal Bonds",
+    "ShortName": "CCity Bonds",
     "Yield": 0.05,
     "BullChanges": {
       "2": 0,
@@ -31,6 +32,7 @@
   },
   {
     "Name": "Growth Corporation of America",
+    "ShortName": "Growth Corp",
     "Yield": 0.01,
     "BullChanges": {
       "2": -2,
@@ -61,6 +63,7 @@
   },
   {
     "Name": "Metro Properties, Inc",
+    "ShortName": "Metro Prop",
     "Yield": 0,
     "BullChanges": {
       "2": -10,
@@ -91,6 +94,7 @@
   },
   {
     "Name": "Pioneer Mutual Fund",
+    "ShortName": "Pioneer",
     "Yield": 0.04,
     "BullChanges": {
       "2": -7,
@@ -121,7 +125,7 @@
   },
   {
     "Name": "Shady Brooks Development",
-    "Yield": 0.07,
+    "ShortName": "Shady",
     "BullChanges": {
       "2": -9,
       "3": 8,
@@ -151,6 +155,7 @@
   },
   {
     "Name": "Stryker Drilling Company",
+    "ShortName": "Stryker",
     "Yield": 0,
     "BullChanges": {
       "2": -2,
@@ -181,6 +186,7 @@
   },
   {
     "Name": "Tri-City Transport Company",
+    "ShortName": "Tri-City",
     "Yield": 0,
     "BullChanges": {
       "2": -9,
@@ -211,6 +217,7 @@
   },
   {
     "Name": "United Auto Company",
+    "ShortName": "United",
     "Yield": 0.02,
     "BullChanges": {
       "2": -7,
@@ -241,6 +248,7 @@
   },
   {
     "Name": "Uranium Enterprises, Inc",
+    "ShortName": "Uranium",
     "Yield": 0.06,
     "BullChanges": {
       "2": -16,
@@ -271,6 +279,7 @@
   },
   {
     "Name": "Valley Power & Light Company",
+    "ShortName": "Valley Power",
     "Yield": 0.03,
     "BullChanges": {
       "2": -4,

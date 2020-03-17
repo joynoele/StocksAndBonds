@@ -43,7 +43,7 @@ namespace Library.Models.Players
         private IList<BoardSecurity> MostYield(IList<BoardSecurity> boardSecurities)
         {
             // Only look at securities that haven't fallen below the threshold where yield cannot be collected
-            return boardSecurities.OrderByDescending(s => s.Security.YieldPer10Shares).Where(s2 => s2.CostPerShare > 30).ToList();
+            return boardSecurities.Where(s2 => s2.CostPerShare > 30).OrderByDescending(s => s.Security.YieldPer10Shares).ToList();
         }
     }
 }
