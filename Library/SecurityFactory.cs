@@ -44,7 +44,6 @@ namespace Library
         /// <param name="jsonPath"></param>
         public static void LoadSecurities(string jsonPath)
         {
-            List<BoardSecurity> items = new List<BoardSecurity>();
             RawSecurities[] fromJson;
 
             // deserialize JSON directly from a file
@@ -60,13 +59,13 @@ namespace Library
             if (_boardSecurities == null)
                 _boardSecurities = new List<BoardSecurity>();
 
-            foreach (var o in fromJson)
+            foreach (var @object in fromJson)
             {
-                var yield = o.Yield*100; // because yields are expressed in percents
-                var s = new Security(-1, o.Name, (int)yield);
-                var b = new BoardSecurity(s, o.BearChanges, o.BullChanges);
-                _securities.Add(s);
-                _boardSecurities.Add(b);
+                var yield = @object.Yield*100; // because yields are expressed in percents
+                var security = new Security(Guid.NewGuid(), @object.Name, (int)yield);
+                var boardSecurity = new BoardSecurity(security, @object.BearChanges, @object.BullChanges);
+                _securities.Add(security);
+                _boardSecurities.Add(boardSecurity);
             }
         }
 

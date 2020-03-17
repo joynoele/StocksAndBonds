@@ -12,7 +12,7 @@ namespace StocksAndBonds.Console
     public class Program
     {
         private static readonly int DefaultStartingBalance = 5000;
-        private static int MaxYears = 25;
+        private static int MaxYears = 10;
 
         public static void Main(string[] args)
         {
@@ -25,7 +25,7 @@ namespace StocksAndBonds.Console
             {
                 System.Console.WriteLine($"Welcome {player.Name}! `{player.Strategy}`");
             }
-            System.Console.WriteLine("Ready???");
+            System.Console.Write("Ready???");
             System.Console.ReadLine();
 
             GameSimulation game = new GameSimulation(MaxYears, GameBoard, new Random());
@@ -39,7 +39,14 @@ namespace StocksAndBonds.Console
             var player1 = new MostSharesAi(DefaultStartingBalance);
             var player2 = new SteadyGrowthAi(DefaultStartingBalance);
             var player3 = new YieldAi(DefaultStartingBalance);
-            return new List<IAiPlayer>() { player1, player2, player3 };
+            var players = new List<IAiPlayer>() { player1, player2, player3 };
+
+            foreach (var index in SecurityFactory.BoardSecurities)
+            {
+                players.Add(new IndexAi(DefaultStartingBalance, index.Security, false));
+            }
+
+            return players;
         }
     }
 }

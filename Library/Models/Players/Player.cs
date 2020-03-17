@@ -43,7 +43,7 @@ namespace Library.Models.Players
             Portfolio = SecurityFactory.InitializePlayerPortfolio();
         }
 
-        public void PrintStatus()
+        public virtual void PrintStatus()
         {
             System.Console.WriteLine($"{this.Name}: ${this.Balance}");
             foreach (PurchasedSecurity myPortfolio in this.Portfolio)
@@ -57,7 +57,7 @@ namespace Library.Models.Players
         {
             foreach (var s in Portfolio)
             {
-                if (boardSecurities.First(b => b.Security.Name == s.Security.Name).CostPerShare <= 30)
+                if (boardSecurities.First(b => b.Security == s.Security).CostPerShare <= 30)
                 {
                     continue; // Securities that fall below a certain value ($30?) cannot have yield collected on them
                 }
