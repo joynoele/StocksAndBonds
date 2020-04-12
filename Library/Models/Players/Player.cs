@@ -57,11 +57,6 @@ namespace Library.Models.Players
         {
             foreach (var s in Portfolio)
             {
-                if (boardSecurities.First(b => b.Security == s.Security).CostPerShare <= 30)
-                {
-                    continue; // Securities that fall below a certain value ($30?) cannot have yield collected on them
-                }
-
                 if (s.Security.YieldPer10Shares > 0 && s.Quantity > 0)
                 {
                     var yield = s.Quantity * s.Security.YieldPer10Shares;

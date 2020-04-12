@@ -10,6 +10,8 @@ namespace Library.Models
         public bool IsSplit = false;
         public Security Security { get; set; }
         public int CostChange { get; private set; }
+        // Securities that fall below a certain value ($30?) cannot have yield collected on them
+        public int Yield { get => CostPerShare > 30 ? this.Security.YieldPer10Shares : 0; }
 
         private Dictionary<int, int> _bearChange;
         private Dictionary<int, int> _bullChange;

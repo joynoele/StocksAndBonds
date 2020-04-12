@@ -2,6 +2,7 @@
 using Library.Models.Players;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -20,10 +21,58 @@ namespace Library
             _die = die;
         }
 
+        public void CaptureSecurityBehavior(string writeLocation, int simulationRuns)
+        {
+            Console.WriteLine("====== starting ======");
+            var run = 0;
+            using (StreamWriter writer = new StreamWriter(writeLocation))
+            {
+                writer.WriteLine("security,year,price,delta,isSplit,yield,return,rateofreturn");
+                while (run < simulationRuns)
+                {
+                    run++;
+                    Console.WriteLine($"Running simulation {run} of {simulationRuns}");
+                    for (int year = 1; year <= _maxYears; year++)
+                    {
+                        var tempRoll = RollD6(2);
+                        _board.AdvanceYear(RollD6(1), tempRoll);
+                        foreach (var boardSecurity in _board.BoardSecurities)
+                        {
+                            /*
+                             * SplitMultiplier,s=1|2, accounts for where the stock has split
+                             * Return,r = s*yield + costChange [e.g. purchased 1 unit for $100, sold for $110 + $2 yield = $12 return]
+                             * Rate of Return,rrt = return/(s*cost - costChange) [e.g. above example would be $12/100 = 12%]
+                             */
+                            var s = boardSecurity.IsSplit ? 2 : 1;
+                            double r = 0; 
+                            double rrt = 0;
+                            try
+                            {
+                                r = (s * boardSecurity.Security.YieldPer10Shares) + boardSecurity.CostChange;
+                                rrt = r / ((s * boardSecurity.CostPerShare) - boardSecurity.CostChange);
+                            }
+                            catch(DivideByZeroException) {
+                                rrt = 0;
+                                Console.WriteLine($"Attempted to divide by zero ({boardSecurity.Security.Name})");
+                            } finally
+                            {
+                                if (Double.IsInfinity(rrt))
+                                {
+                                    rrt = 0;
+                                    Console.WriteLine($"rrt was infinite ({boardSecurity.Security.Name})");
+                                }
+                            }
+                            writer.WriteLine($"{boardSecurity.Security.ShortName},{year},{boardSecurity.CostPerShare},{boardSecurity.CostChange},{boardSecurity.IsSplit},{boardSecurity.Security.YieldPer10Shares},{r},{rrt}");
+                        }
+                    }
+                } 
+            }
+            Console.Write("====== completed ======");
+        }
+
         public void PlayAiSimulation(IList<IAiPlayer> players)
         {
-            int year = 1;
-            for (; year <= _maxYears; year++)
+            for (int year = 1; year <= _maxYears; year++)
             {
                 Console.WriteLine($"\n======= YEAR {year} of {_maxYears} ======");
                 // Collect Yield (if any) - 
