@@ -17,7 +17,7 @@ namespace Library.Models.Players
             Reinvest = reinvest;
         }
 
-        public void TakeTurn(IList<BoardSecurity> securities)
+        public void TakeTurn(IList<BoardSecurity> securities, int year)
         {
             // Poor man's way of determining if this is year 1 or not
             if (Reinvest || (Portfolio.Sum(s => s.Quantity) == 0 && Balance != 0))

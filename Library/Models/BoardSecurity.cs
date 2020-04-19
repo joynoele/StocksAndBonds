@@ -24,6 +24,7 @@ namespace Library.Models
             _bullChange = bullChange;
         }
 
+        // TODO: lock this method down to only approved classes!!!
         public void AdjustPrice(MarketDirection direction, int diceRoll)
         {
             // Reset the split before calculating the next price

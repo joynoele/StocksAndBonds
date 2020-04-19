@@ -105,7 +105,7 @@ namespace Library
                 // Take Turns
                 foreach (var ai in players)
                 {
-                    ai.TakeTurn(_board.BoardSecurities);
+                    ai.TakeTurn(_board.BoardSecurities, year);
                 }
 
                 // Print round end summary

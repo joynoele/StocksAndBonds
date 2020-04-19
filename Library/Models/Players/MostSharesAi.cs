@@ -12,7 +12,7 @@ namespace Library.Models.Players
         {
         }
 
-        public void TakeTurn(IList<BoardSecurity> securities)
+        public void TakeTurn(IList<BoardSecurity> securities, int year)
         {
             var securitiesByCost = CheapestSecurities(securities);
             bool didBuy = false;
