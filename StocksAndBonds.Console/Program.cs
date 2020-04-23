@@ -27,21 +27,20 @@ namespace StocksAndBonds.Console
             SecurityFactory.LoadSecurities("..\\..\\..\\..\\securities.json");
 
             // Run either the AIs, or a simulation of the game:
-            //RunAIs(SecurityFactory.BoardSecurities);
-            SimulateStockPrices(SecurityFactory.BoardSecurities);
+            //RunAIs(SecurityFactory.BoardSecurities2);
+            SimulateStockPrices(SecurityFactory.BoardSecurities2, 10);
 
             System.Console.ReadLine();
         }
 
-        private static void SimulateStockPrices(IList<BoardSecurity> securities)
+        private static void SimulateStockPrices(BoardSecurities securities, int numberOfSimulations)
         {
-            int numberOfSimulations = 500;
             string writePath = @"C:\tmp\StockPriceSimulation_" + DateTime.Now.ToString("yyyy_MM_dd") + ".csv";
             GameSimulation game = new GameSimulation(MaxRounds, securities, new Random(), null);
-            game.CaptureSecurityBehavior(writePath, numberOfSimulations);
+            game.CaptureSecurityBehavior_Regression(writePath, numberOfSimulations);
         }
 
-        private static void RunAIs(IList<BoardSecurity> securities)
+        private static void RunAIs(BoardSecurities securities)
         {
             var players = InitializePlayers(DefaultStartingBalance);
             System.Console.WriteLine("===== Starting simulation of 'Stocks & Bonds' =====");
@@ -63,16 +62,15 @@ namespace StocksAndBonds.Console
             var player3 = new YieldAi(startingBalance);
             var players = new List<IAiPlayer>() { player1, player2, player3 };
 
-            foreach (var index in SecurityFactory.BoardSecurities)
+            foreach (var asset in SecurityFactory.BoardSecurities)
             {
-                players.Add(new IndexAi(startingBalance, index.Security, false));
-                if (index.Security.YieldPer10Shares > 0)
-                    players.Add(new IndexAi(startingBalance, index.Security, true));
+                var security = asset.Key;
+                players.Add(new IndexAi(startingBalance, security, false));
+                if (security.YieldPer10Shares > 0)
+                    players.Add(new IndexAi(startingBalance, security, true));
             }
 
             return players;
-
-            //return new List<IAiPlayer>() { new SteadyGrowthAi(startingBalance) };
         }
     }
 }

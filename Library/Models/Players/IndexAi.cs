@@ -17,16 +17,16 @@ namespace Library.Models.Players
             Reinvest = reinvest;
         }
 
-        public void TakeTurn(IList<BoardSecurity> securities, int year)
+        public void TakeTurn(IList<Asset> asset, int year)
         {
             // Poor man's way of determining if this is year 1 or not
             if (Reinvest || (Portfolio.Sum(s => s.Quantity) == 0 && Balance != 0))
-                MaxBuy(securities.First(s => s.Security == IndexSecurity));
+                MaxBuy(asset.First(a => a.Id == IndexSecurity.Id));
         }
 
         public override void PrintStatus()
         {
-            Console.WriteLine($"{Name}: ${Balance} {Portfolio.First(s => s.Security == IndexSecurity).Quantity} shares");
+            Console.WriteLine($"{Name}: ${Balance} {GetAsset(IndexSecurity).Quantity} shares");
         }
     }
 }

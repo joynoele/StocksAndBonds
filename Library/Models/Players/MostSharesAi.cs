@@ -12,7 +12,7 @@ namespace Library.Models.Players
         {
         }
 
-        public void TakeTurn(IList<BoardSecurity> securities, int year)
+        public void TakeTurn(IList<Asset> securities, int year)
         {
             var securitiesByCost = CheapestSecurities(securities);
             bool didBuy = false;
@@ -38,7 +38,7 @@ namespace Library.Models.Players
             }
         }
 
-        private List<BoardSecurity> CheapestSecurities(IList<BoardSecurity> boardSecurities)
+        private List<Asset> CheapestSecurities(IList<Asset> boardSecurities)
         {
             // Anything under 30 (magic number) has a tendancy to go down to 0. Don't buy.
             return boardSecurities.Where(s2 => s2.CostPerShare > 30).OrderBy(s1 => s1.CostPerShare).ToList();

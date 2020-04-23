@@ -12,58 +12,44 @@ namespace Library
     {
         private readonly int _maxRounds;
         private Random _die;
-        private readonly IList<BoardSecurity> _securities;
+        private readonly BoardSecurities _boardSecurities;
         private IList<IAiPlayer> _players;
 
-        public GameSimulation(int rounds, IList<BoardSecurity> securities, Random die, IList<IAiPlayer> players)
+        public GameSimulation(int rounds, BoardSecurities boardSecurities, Random die, IList<IAiPlayer> players)
         {
             _maxRounds = rounds;
-            _securities = securities;
+            _boardSecurities = boardSecurities;
             _die = die;
             _players = players ?? new List<IAiPlayer>(){};
         }
 
-        public void CaptureSecurityBehavior(string writeLocation, int simulationRuns)
+        public void CaptureSecurityBehavior_Regression(string writeLocation, int simulationRuns)
         {
             Console.WriteLine("====== starting ======");
-            StockBoard board = new StockBoard(_securities);
+            StockBoard board = new StockBoard(_boardSecurities);
             using (StreamWriter writer = new StreamWriter(writeLocation))
             {
                 writer.WriteLine("Run,Security,Year,Price,Delta,IsSplit,IsBust,Yield,ReturnOnInvestment,RateOfReturn");
                 for (int run = 1; run <= simulationRuns; run++)
                 {
                     board.Initialize();
-                    //var foo0 = board.BoardSecurities.First(st => st.Security.ShortName == "Stryker");
-                    //Console.Write($"0:{foo0.CostPerShare}({foo0.CostChange}) ");
-
                     board.AdvanceYear(RollD6(1), RollD6(2)); // Setup the board for buying round 1; return on investments can only be calculated after the first buying round
                     Console.Write($"\nRunning simulation {run} of {simulationRuns}");
 
-                    //var foo = board.BoardSecurities.First(st => st.Security.ShortName == "Stryker");
-                    //Console.Write($"1:{foo.CostPerShare}({foo.CostChange}) ");
-
                     while (board.Year <= _maxRounds)
                     {
-                        //Console.Write($"..{board.Year}");
+                        Console.Write($"..{board.Year}");
                         board.AdvanceYear(RollD6(1), RollD6(2));
                         foreach (var boardSecurity in board.BoardSecurities)
                         {
-                            if (boardSecurity.Security.ShortName == "Stryker")
-                            {
-                                if (boardSecurity.IsBust)
-                                    Console.WriteLine($":B({boardSecurity.CostChange}) ");
-                                else
-                                    Console.Write($":{boardSecurity.CostPerShare}({boardSecurity.CostChange}) ");
-                            }
-
                             /*
                              * SplitMultiplier,s=1|2, accounts for where the stock has split
                              * Return,r = s*yield + costChange [e.g. purchased 1 unit for $100, sold for $110 + $2 yield = $12 return]
                              * Rate of Return,rrt = return/(s*cost - costChange) [e.g. above example would be $12/100 = 12%]
                              */
                             var s = boardSecurity.IsSplit ? 2 : 1;
-                            double r = 0; 
-                            double rrt = 0;
+                            decimal r = 0;
+                            decimal rrt = 0;
                             try
                             {
                                 if (boardSecurity.IsBust)
@@ -71,24 +57,26 @@ namespace Library
                                     // Because a busted security gets reset right away, we need to ignore the currently posted price/price changes
                                     r = -boardSecurity.CostChange;
                                     rrt = -1;
-                                } else
+                                }
+                                else
                                 {
-                                    r = (s * boardSecurity.Security.YieldPer10Shares) + boardSecurity.CostChange;
+                                    r = (s * boardSecurity.YieldPer10Shares) + boardSecurity.CostChange;
                                     rrt = r / ((s * boardSecurity.CostPerShare) - boardSecurity.CostChange);
                                 }
                             }
-                            catch(DivideByZeroException) {
-                                rrt = 0;
-                                Console.WriteLine($"Attempted to divide by zero ({boardSecurity.Security.Name})\n");
-                            } finally
+                            catch (DivideByZeroException)
                             {
-                                if (Double.IsInfinity(rrt))
-                                {
-                                    rrt = -1;
-                                    Console.WriteLine($"rrt was infinite ({boardSecurity.Security.Name})\n");
-                                }
-                            }
-                            writer.WriteLine($"{run},{boardSecurity.Security.ShortName},{board.Year},{boardSecurity.CostPerShare},{boardSecurity.CostChange},{boardSecurity.IsSplit},{boardSecurity.IsBust},{boardSecurity.Security.YieldPer10Shares},{r},{rrt}");
+                                rrt = 0;
+                                Console.WriteLine($"Attempted to divide by zero ({boardSecurity.Name})\n");
+                            } //finally
+                            //{
+                                //if (Double.IsInfinity(rrt))
+                                //{
+                                //    rrt = -1;
+                                //    Console.WriteLine($"rrt was infinite ({boardSecurity.Key.Name})\n");
+                                //}
+                            //}
+                            writer.WriteLine($"{run},{boardSecurity.ShortName},{board.Year},{boardSecurity.CostPerShare},{boardSecurity.CostChange},{boardSecurity.IsSplit},{boardSecurity.IsBust},{boardSecurity.YieldPer10Shares},{r},{rrt}");
                         }
                     }
                 } 
@@ -98,7 +86,7 @@ namespace Library
 
         public void PlayAiSimulation()
         { 
-            var board= new StockBoard(_securities);
+            var board= new StockBoard(_boardSecurities);
 
             do
             {
@@ -109,14 +97,14 @@ namespace Library
                 // Take Turns
                 foreach (var ai in _players)
                 {
-                    ai.TakeTurn(board.BoardSecurities, board.Year);
+                    ai.TakeTurn(board.BoardSecurities.Assets, board.Year);
                 }
 
                 // Print round end summary
                 Console.WriteLine();
                 foreach (var player in _players)
                 {
-                    Console.Write($"({player.TotalWealth(board.BoardSecurities)}) ");
+                    Console.Write($"({player.TotalWealth(board.BoardSecurities.Assets)}) ");
                     player.PrintStatus();
                 }
 
@@ -127,7 +115,7 @@ namespace Library
                 AdvanceRound(board);
             foreach (var player in _players)
             {
-                player.CashOut(board.BoardSecurities);
+                player.CashOut(board.BoardSecurities.Assets);
             }
 
             Console.WriteLine($"======= GAME OVER ======");
@@ -140,7 +128,7 @@ namespace Library
             // Collect Yield (if any) 
             foreach (var ai in _players)
             {
-                ai.AddYield(board.BoardSecurities);
+                ai.AddYield(board.BoardSecurities.Assets);
             }
 
             // Change prices
@@ -151,20 +139,20 @@ namespace Library
             else
                 Console.WriteLine($"--- Rolled {tempRoll} on {board.BoardMarket} market ---");
 
-            foreach (var boardSecurity in board.BoardSecurities)
+            foreach (var asset in board.BoardSecurities)
             {
                 // Award securities for players holding split stocks
-                if (boardSecurity.IsSplit)
+                if (asset.IsSplit)
                 {
-                    Console.WriteLine($"{boardSecurity.Security} split!");
-                    foreach (var player in _players) { player.SplitOwnedSecurity(boardSecurity.Security); }
+                    Console.WriteLine($"{asset.ShortName} split!");
+                    foreach (var player in _players) { player.SplitOwnedSecurity(asset); }
                 }
 
                 // Revoke securities for players holding sunk stocks
-                if (boardSecurity.IsBust)
+                if (asset.IsBust)
                 {
-                    Console.WriteLine($"{boardSecurity.Security} bust!");
-                    foreach (var player in _players) { player.ForfitBustSecurity(boardSecurity.Security); }
+                    Console.WriteLine($"{asset.ShortName} bust!");
+                    foreach (var player in _players) { player.ForfitBustSecurity(asset); }
                 }
             }
             board.PrintBoard();

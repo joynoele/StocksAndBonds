@@ -13,15 +13,16 @@ namespace Library.Models
         public bool IsSplit { get; private set; }
         public bool IsBust { get; private set; }
         public Security Security { get; private set; }
+        public decimal YieldPer10Shares { get; private set; }
         public int CostChange { get; private set; }
-        public int CollectYieldAmt { get => !IsBust && CostPerShare > 30 ? this.Security.YieldPer10Shares : 0; } // Securities that fall below a certain value ($30?) cannot have yield collected on them
+        public decimal CollectYieldAmt { get => !IsBust && CostPerShare > 30 ? YieldPer10Shares : 0; } // Securities that fall below a certain value ($30?) cannot have yield collected on them
 
         private Dictionary<int, int> _bearChange;
         private Dictionary<int, int> _bullChange;
 
-        public BoardSecurity(Security security, Dictionary<int, int> bearChange, Dictionary<int, int> bullChange)
+        public BoardSecurity(decimal yield, Dictionary<int, int> bearChange, Dictionary<int, int> bullChange)
         {
-            Security = security;
+            YieldPer10Shares = yield;
             _bearChange = bearChange;
             _bullChange = bullChange;
             Initialize();

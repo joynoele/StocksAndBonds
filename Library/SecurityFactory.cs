@@ -28,13 +28,15 @@ namespace Library
             }
         }
 
-        private static IList<BoardSecurity> _boardSecurities;
-        public static IList<BoardSecurity> BoardSecurities
+        public static BoardSecurities BoardSecurities2 => new BoardSecurities(BoardSecurities);
+
+        private static IDictionary<Security, BoardSecurity> _boardSecurities;
+        public static IDictionary<Security, BoardSecurity> BoardSecurities
         {
             get
             {
                 if (_securities == null)
-                    throw new Exception("Securities not loaded yet; load securities from file");
+                    throw new Exception("Securities not loaded yet; load securities from file first");
                 return _boardSecurities;
             }
         }
@@ -58,15 +60,15 @@ namespace Library
             if (_securities == null)
                 _securities = new List<Security>();
             if (_boardSecurities == null)
-                _boardSecurities = new List<BoardSecurity>();
+                _boardSecurities = new Dictionary<Security, BoardSecurity>();
 
             foreach (var @object in fromJson)
             {
                 var yield = @object.Yield*100; // because yields are expressed in percents
                 var security = new Security(Guid.NewGuid(), @object.Name, @object.ShortName, (int)yield);
-                var boardSecurity = new BoardSecurity(security, @object.BearChanges, @object.BullChanges);
+                var boardSecurity = new BoardSecurity(yield, @object.BearChanges, @object.BullChanges);
                 _securities.Add(security);
-                _boardSecurities.Add(boardSecurity);
+                _boardSecurities.Add(security, boardSecurity);
             }
         }
 
@@ -82,7 +84,8 @@ namespace Library
 
         public static StockBoard CreateGameBoard()
         {
-            return new StockBoard(_boardSecurities);
+            var boardSecurities = new BoardSecurities(_boardSecurities);
+            return new StockBoard(boardSecurities);
         }
     }
 }

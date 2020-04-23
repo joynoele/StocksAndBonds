@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
-using StocksAndBondsML.Model;
+//using StocksAndBondsML.Model;
 
 namespace Library.Models.Players
 {
@@ -15,7 +15,7 @@ namespace Library.Models.Players
         {
         }
 
-        public void TakeTurn(IList<BoardSecurity> securities, int year)
+        public void TakeTurn(IList<Asset> securities, int year)
         {
 
             var costChanges = securities.Select(s => s.CostChange);
@@ -30,7 +30,7 @@ namespace Library.Models.Players
             //SellAll(nonGrowth);
 
             CashOut(securities);
-            var securitiesByGrowth = TopGrowthPics(securities, year);
+            var securitiesByGrowth = SteadyGrowth(securities, 12, 10); //TopGrowthPics(securities, year);
             
 
             foreach (var goodBuy in securitiesByGrowth)
@@ -39,31 +39,31 @@ namespace Library.Models.Players
             }
         }
 
-        private IEnumerable<BoardSecurity> TopGrowthPics(IList<BoardSecurity> boardSecurities, int year)
-        {
-            /**
-            Use ML.NET to see what are the best deals out there:
-            using StocksAndBondsML.Model;
-            // Add input data
-            var input = new ModelInput();
-            // Load model and predict output of sample data
-            ModelOutput result = ConsumeModel.Predict(input);
-            **/
-            var withRrt = new Dictionary<BoardSecurity, float>();
+        //private IEnumerable<Asset> TopGrowthPics(IList<BoardSecurity> boardSecurities, int year)
+        //{
+        //    /**
+        //    Use ML.NET to see what are the best deals out there:
+        //    using StocksAndBondsML.Model;
+        //    // Add input data
+        //    var input = new ModelInput();
+        //    // Load model and predict output of sample data
+        //    ModelOutput result = ConsumeModel.Predict(input);
+        //    **/
+        //    var withRrt = new Dictionary<BoardSecurity, float>();
 
-            foreach (BoardSecurity s in boardSecurities)
-            {
-                var input = new ModelInput() { Security = s.Security.ShortName, Year = year, Price = s.CostPerShare, IsSplit = s.IsSplit};
-                ModelOutput result = ConsumeModel.Predict(input);
-                Console.WriteLine($"{s.Security.ShortName} has a predicted rrt of {result.Score:P2}: year={year}, price={s.CostPerShare}, IsSplit={s.IsSplit}");
-                if (result.Score > 0) withRrt.Add(s, result.Score);
-            }
-            var topPicks = withRrt.OrderByDescending(x => x.Value).Select(y => y.Key);
-            Console.WriteLine($"Growth Securities to buy (in order) are: {string.Join(", ", topPicks.Select(x => x.Security.ShortName)) }");
-            return topPicks;
-        }
+        //    foreach (BoardSecurity s in boardSecurities)
+        //    {
+        //        var input = new ModelInput() { Security = s.Security.ShortName, Year = year, Price = s.CostPerShare, IsSplit = s.IsSplit};
+        //        ModelOutput result = ConsumeModel.Predict(input);
+        //        Console.WriteLine($"{s.Security.ShortName} has a predicted rrt of {result.Score:P2}: year={year}, price={s.CostPerShare}, IsSplit={s.IsSplit}");
+        //        if (result.Score > 0) withRrt.Add(s, result.Score);
+        //    }
+        //    var topPicks = withRrt.OrderByDescending(x => x.Value).Select(y => y.Key);
+        //    Console.WriteLine($"Growth Securities to buy (in order) are: {string.Join(", ", topPicks.Select(x => x.Security.ShortName)) }");
+        //    return topPicks;
+        //}
 
-        private List<BoardSecurity> SteadyGrowth(IList<BoardSecurity> boardSecurities, double avgGrowth, double stdDev)
+        private List<Asset> SteadyGrowth(IList<Asset> boardSecurities, double avgGrowth, double stdDev)
         {
             // Go after securities with the highest growth, within 1 standard deviation of all securities
             // Persue growth, but only within what is considered "normal" with respect to all securities

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Library.Models.Players
@@ -7,29 +8,29 @@ namespace Library.Models.Players
     {
         string Name { get; }
         string Strategy { get; }
-        int Balance { get; }
+        decimal Balance { get; }
         IList<PurchasedSecurity> Portfolio { get; }
         
-        int TotalWealth(IList<BoardSecurity> securities);
-        void AddYield(IList<BoardSecurity> securities);
+        decimal TotalWealth(IList<Asset> securities);
+        void AddYield(IList<Asset> securities);
         void PrintStatus();
-        int CashOut(IList<BoardSecurity> securities);
-        void SplitOwnedSecurity(Security security);
-        void ForfitBustSecurity(Security security);
+        decimal CashOut(IList<Asset> securities);
+        void SplitOwnedSecurity(Asset security);
+        void ForfitBustSecurity(Asset security);
     }
 
     public abstract class Player : IPlayer
     {
-        public int Balance { get; private set; }
+        public decimal Balance { get; private set; }
         public string Name { get; }
         public string Strategy { get; }
         public IList<PurchasedSecurity> Portfolio { get; }
-        public int TotalWealth(IList<BoardSecurity> securities)
+        public decimal TotalWealth(IList<Asset> securities)
         {
             var wealth = Balance;
             foreach (var p in Portfolio)
             {
-                wealth += securities.First(b => b.Security == p.Security).CostPerShare * p.Quantity;
+                wealth += securities.First(b => b.Id == p.Security.Id).CostPerShare * p.Quantity;
             }
             return wealth;
         }
@@ -53,7 +54,7 @@ namespace Library.Models.Players
             }
         }
 
-        public void AddYield(IList<BoardSecurity> boardSecurities)
+        public void AddYield(IList<Asset> boardSecurities)
         {
             foreach (var s in Portfolio)
             {
@@ -66,11 +67,11 @@ namespace Library.Models.Players
             }
         }
 
-        protected int MaxBuy(BoardSecurity purchaseSecurity)
+        protected int MaxBuy(Asset purchaseSecurity)
         {
             if (purchaseSecurity.CostPerShare <= 0) return 0; // cannot purchase shares that have $0 valuation
 
-            int affordableShares = Balance / (purchaseSecurity.CostPerShare);
+            int affordableShares = (int) Balance / purchaseSecurity.CostPerShare; // I think it truncates partial amounts...
             Buy(purchaseSecurity, affordableShares / 10);
             return affordableShares;
         }
@@ -80,7 +81,7 @@ namespace Library.Models.Players
         /// </summary>
         /// <param name="purchaseSecurity"></param>
         /// <param name="purchaseBundle">Set of 10</param>
-        protected void Buy(BoardSecurity purchaseSecurity, int purchaseBundle)
+        protected void Buy(Asset purchaseSecurity, int purchaseBundle)
         {
             if (purchaseSecurity.CostPerShare <= 0) return; // cannot purchase shares that have $0 valuation
 
@@ -91,61 +92,72 @@ namespace Library.Models.Players
                 // Not enough $ to do this transaction
                 return;
             }
-            // TODO: adjust sellQuantity available in gameplay
-            if (Portfolio.First(s => s.Security == purchaseSecurity.Security) == null)
-                Portfolio.Add(new PurchasedSecurity(purchaseSecurity.Security));
 
-            Portfolio.First(s => s.Security == purchaseSecurity.Security).Quantity += purchaseVolume;
+            // TODO: adjust sellQuantity available in gameplay
+
+            if (GetAsset(purchaseSecurity) == null)
+                Portfolio.Add(new PurchasedSecurity(purchaseSecurity));
+
+            Portfolio.First(s => s.Security.Id == purchaseSecurity.Id).Quantity += purchaseVolume;
             Balance -= cost;
 
             if (purchaseVolume > 0)
-                System.Console.WriteLine($"{Name} purchased {purchaseVolume} shares of {purchaseSecurity.Security} for {cost}");
-
+                System.Console.WriteLine($"{Name} purchased {purchaseVolume} shares of {purchaseSecurity} for {cost}");
         }
 
-        protected void SellAll(IList<BoardSecurity> sellingSecurities)
+        protected void SellAll(IList<Asset> sellingSecurities)
         {
             foreach (var b in sellingSecurities)
             {
                 Sell(b);
             }
         }
-        protected void Sell(BoardSecurity sellingSecurity)
+        protected void Sell(Asset sellingSecurity)
         {
-            var sellQuantity = Portfolio.First(x => x.Security == sellingSecurity.Security).Quantity;
+            var sellQuantity = GetAsset(sellingSecurity).Quantity;
             Sell(sellingSecurity, sellQuantity);
         }
 
-        protected void Sell(BoardSecurity sellingSecurity, int sellQuantity)
+        protected void Sell(Asset sellingSecurity, int sellQuantity)
         {
             // TODO: check if we have this security at all
-            if (Portfolio.First(x => x.Security == sellingSecurity.Security).Quantity < sellQuantity)
+            if (GetAsset(sellingSecurity).Quantity < sellQuantity)
             {
                 // Not enough of this sellingSecurities to do this transaction
                 return;
             }
             // TODO: adjust sellQuantity available in gameplay
-            Portfolio.First(x => x.Security == sellingSecurity.Security).Quantity -= sellQuantity;
+            GetAsset(sellingSecurity).Quantity -= sellQuantity;
             Balance += sellingSecurity.CostPerShare * sellQuantity;
 
             if (sellQuantity > 0)
-                System.Console.WriteLine($"{Name} sold {sellQuantity} shares of {sellingSecurity.Security} for {sellingSecurity.CostPerShare * sellQuantity}");
+                System.Console.WriteLine($"{Name} sold {sellQuantity} shares of {sellingSecurity} for {sellingSecurity.CostPerShare * sellQuantity}");
         }
 
-        public int CashOut(IList<BoardSecurity> securities)
+        public decimal CashOut(IList<Asset> securities)
         {
             SellAll(securities);
             return Balance;
         }
 
-        public void SplitOwnedSecurity(Security security)
+        public void SplitOwnedSecurity(Asset asset)
         {
-            Portfolio.First(s => s.Security == security).Quantity *= 2;
+            Portfolio.First(s => s.Security.Id == asset.Id).Quantity *= 2;
         }
 
-        public void ForfitBustSecurity(Security security)
+        public void ForfitBustSecurity(Asset asset)
         {
-            Portfolio.First(s => s.Security == security).Quantity = 0;
+            Portfolio.First(s => s.Security.Id == asset.Id).Quantity = 0;
+        }
+
+        protected PurchasedSecurity GetAsset(Asset findAsset)
+        {
+            return Portfolio.Where(x => x.Security.Id == findAsset.Id).FirstOrDefault();
+        }
+
+        protected PurchasedSecurity GetAsset(Security findSecurity)
+        {
+            return Portfolio.Where(x => x.Security.Id == findSecurity.Id).FirstOrDefault();
         }
     }
 }
