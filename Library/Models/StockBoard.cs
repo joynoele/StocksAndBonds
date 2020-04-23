@@ -12,7 +12,18 @@ namespace Library.Models
         public StockBoard(IList<BoardSecurity> boardSecurities)
         {
             BoardSecurities = boardSecurities;
+            Initialize();
+        }
+
+        // Setup gameboard to start a fresh game
+        public void Initialize()
+        {
             Year = 0;
+            BoardMarket = MarketDirection.NotSet;
+            foreach(var boardSecurity in BoardSecurities)
+            {
+                boardSecurity.Initialize();
+            }
         }
 
         public void AdvanceYear(int marketRoll, int sum2D6)

@@ -15,7 +15,7 @@ namespace Library.Models.Players
         void PrintStatus();
         int CashOut(IList<BoardSecurity> securities);
         void SplitOwnedSecurity(Security security);
-        void ForfitSunkSecurity(Security security);
+        void ForfitBustSecurity(Security security);
     }
 
     public abstract class Player : IPlayer
@@ -143,7 +143,7 @@ namespace Library.Models.Players
             Portfolio.First(s => s.Security == security).Quantity *= 2;
         }
 
-        public void ForfitSunkSecurity(Security security)
+        public void ForfitBustSecurity(Security security)
         {
             Portfolio.First(s => s.Security == security).Quantity = 0;
         }
