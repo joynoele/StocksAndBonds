@@ -1,0 +1,39 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Linq;
+
+namespace Library.Models.Players
+{
+    public class MaximizeRrtAi : GrowthAi, IGrowthAi
+    {
+        
+        public MaximizeRrtAi(int initialBalance, int maxYears, IEnumerable<Asset> assetsInPlay) 
+            : base(initialBalance, "MaxRrt", null, maxYears, assetsInPlay)
+        {
+        }
+
+        public void TakeTurn(IList<Asset> assets, int year)
+        {
+            UpdateLedger(assets, year);
+
+            // evaluate the securities based on calculations in the ledger
+            var purchaseOrder = AnalysisTables
+                .Where(w => w.Value.AvgRateOfReturn[year-1] > 0)
+                .OrderByDescending(x => x.Value.AvgRateOfReturn[year-1])
+                .Select(y => y.Key);
+            Console.WriteLine($"{this.Name}'s top 3 picks: {purchaseOrder.First()}, {purchaseOrder.Skip(1).Take(1)}, {purchaseOrder.Skip(2).Take(1)}");
+
+            // TODO: buy/sell
+            foreach (var puchase in purchaseOrder)
+            {
+                MaxBuy(puchase);
+            }
+        }
+
+        public void Observe(IList<Asset> securities, int year)
+        {
+            UpdateLedger(securities, year);
+        }
+    }
+}

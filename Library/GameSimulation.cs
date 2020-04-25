@@ -60,7 +60,7 @@ namespace Library
                                 }
                                 else
                                 {
-                                    r = (s * boardSecurity.YieldPer10Shares) + boardSecurity.CostChange;
+                                    r = (s * boardSecurity.CollectYieldAmt) + boardSecurity.CostChange;
                                     rrt = r / ((s * boardSecurity.CostPerShare) - boardSecurity.CostChange);
                                 }
                             }
@@ -76,7 +76,7 @@ namespace Library
                                 //    Console.WriteLine($"rrt was infinite ({boardSecurity.Key.Name})\n");
                                 //}
                             //}
-                            writer.WriteLine($"{run},{boardSecurity.ShortName},{board.Year},{boardSecurity.CostPerShare},{boardSecurity.CostChange},{boardSecurity.IsSplit},{boardSecurity.IsBust},{boardSecurity.YieldPer10Shares},{r},{rrt}");
+                            writer.WriteLine($"{run},{boardSecurity.ShortName},{board.Year},{boardSecurity.CostPerShare},{boardSecurity.CostChange},{boardSecurity.IsSplit},{boardSecurity.IsBust},{boardSecurity.CollectYieldAmt},{r},{rrt}");
                         }
                     }
                 } 
@@ -86,8 +86,8 @@ namespace Library
 
         public void PlayAiSimulation()
         { 
-            var board= new StockBoard(_boardSecurities);
-
+            var board = new StockBoard(_boardSecurities);
+            foreach (var ai in _players) ai.Observe(board.BoardSecurities.Assets, board.Year);
             do
             {
                 Console.WriteLine($"\n======= YEAR {board.Year} of {_maxRounds} ======");

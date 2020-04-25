@@ -27,8 +27,8 @@ namespace StocksAndBonds.Console
             SecurityFactory.LoadSecurities("..\\..\\..\\..\\securities.json");
 
             // Run either the AIs, or a simulation of the game:
-            //RunAIs(SecurityFactory.BoardSecurities2);
-            SimulateStockPrices(SecurityFactory.BoardSecurities2, 10);
+            RunAIs(SecurityFactory.BoardSecurities2);
+            //SimulateStockPrices(SecurityFactory.BoardSecurities2, 10);
 
             System.Console.ReadLine();
         }
@@ -42,7 +42,11 @@ namespace StocksAndBonds.Console
 
         private static void RunAIs(BoardSecurities securities)
         {
-            var players = InitializePlayers(DefaultStartingBalance);
+            var Tim = new MaximizeRrtAi(DefaultStartingBalance, MaxRounds, SecurityFactory.BoardSecurities2.Assets);
+            var Stompy = new YieldAi(DefaultStartingBalance);
+            var p1 = new MaximizeRrtAi(DefaultStartingBalance, MaxRounds, SecurityFactory.BoardSecurities2.Assets);
+            var p2 = new MostSharesAi(DefaultStartingBalance);
+            var players = new List<IAiPlayer>(){ Tim, Stompy, p1, p2 }; // InitializePlayers(DefaultStartingBalance);
             System.Console.WriteLine("===== Starting simulation of 'Stocks & Bonds' =====");
             foreach (var player in players)
             {

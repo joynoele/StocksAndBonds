@@ -22,7 +22,7 @@ namespace Library.Models
         public int CostPerShare => _boardSecurity.CostPerShare;
         public bool IsSplit => _boardSecurity.IsSplit;
         public bool IsBust => _boardSecurity.IsBust;
-        public decimal YieldPer10Shares => _boardSecurity.YieldPer10Shares;
+        //public decimal YieldPer10Shares => _boardSecurity.YieldPer10Shares;
         public int CostChange => _boardSecurity.CostChange;
         public decimal CollectYieldAmt => _boardSecurity.CollectYieldAmt;
         public override string ToString() => _security.ToString();

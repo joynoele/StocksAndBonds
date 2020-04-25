@@ -19,14 +19,18 @@ namespace Library.Models.Players
 
         public void TakeTurn(IList<Asset> asset, int year)
         {
-            // Poor man's way of determining if this is year 1 or not
-            if (Reinvest || (Portfolio.Sum(s => s.Quantity) == 0 && Balance != 0))
+            if (Reinvest || year > 1)
                 MaxBuy(asset.First(a => a.Id == IndexSecurity.Id));
         }
 
         public override void PrintStatus()
         {
             Console.WriteLine($"{Name}: ${Balance} {GetAsset(IndexSecurity).Quantity} shares");
+        }
+
+        public void Observe(IList<Asset> securities, int year)
+        {
+            // do nothing
         }
     }
 }

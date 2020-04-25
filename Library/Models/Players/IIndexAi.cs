@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Library.Models.Players
 {
-    interface IIndexAi : IAiPlayer
+    public interface IIndexAi : IAiPlayer
     {
         Security IndexSecurity { get; }
         void PrintStatus();

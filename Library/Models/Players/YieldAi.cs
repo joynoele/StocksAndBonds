@@ -40,10 +40,15 @@ namespace Library.Models.Players
             }
         }
 
+        public void Observe(IList<Asset> securities, int year)
+        {
+            // do nothing
+        }
+
         private IList<Asset> MostYield(IList<Asset> boardSecurities)
         {
             // Only look at securities that haven't fallen below the threshold where yield cannot be collected
-            return boardSecurities.Where(s2 => s2.CostPerShare > 30).OrderByDescending(s => s.YieldPer10Shares).ToList();
+            return boardSecurities.Where(s2 => s2.CostPerShare > 30).OrderByDescending(s => s.CollectYieldAmt).ToList();
         }
     }
 }
