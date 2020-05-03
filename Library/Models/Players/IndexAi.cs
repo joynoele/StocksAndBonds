@@ -28,9 +28,5 @@ namespace Library.Models.Players
             Console.WriteLine($"{Name}: ${Balance} {GetAsset(IndexSecurity).Quantity} shares");
         }
 
-        public void Observe(IList<Asset> securities, int year)
-        {
-            // do nothing
-        }
     }
 }

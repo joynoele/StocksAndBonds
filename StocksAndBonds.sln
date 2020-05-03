@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.29324.140
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StocksAndBonds.Console", "StocksAndBonds.Console\StocksAndBonds.Console.csproj", "{14B86549-A643-4566-94A5-EC126CF4C89F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Library", "Library\Library.csproj", "{E80C0A60-9928-473A-BCD7-DB96DBB2A375}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StocksAndBonds.Library", "Library\StocksAndBonds.Library.csproj", "{E80C0A60-9928-473A-BCD7-DB96DBB2A375}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{7179175F-54A8-4041-848B-5DAD7BE25251}"
 	ProjectSection(SolutionItems) = preProject

@@ -7,6 +7,9 @@ using System.Linq;
 using System.Security;
 using Library.Models.Players;
 using Serilog;
+using Microsoft.ML;
+using Library.ML;
+using System.IO;
 
 namespace StocksAndBonds.Console
 {
@@ -18,17 +21,11 @@ namespace StocksAndBonds.Console
 
         public static void Main(string[] args)
         {
-            // TODO: Add logging
-            //Log.Logger = new LoggerConfiguration()
-            //    .WriteTo.Console()
-            //    .WriteTo.File(LOG_FILEPATH, )
-            //    .CreateLogger();
-
             SecurityFactory.LoadSecurities("..\\..\\..\\..\\securities.json");
 
             // Run either the AIs, or a simulation of the game:
             RunAIs(SecurityFactory.BoardSecurities2);
-            //SimulateStockPrices(SecurityFactory.BoardSecurities2, 10);
+            //SimulateStockPrices(SecurityFactory.BoardSecurities2, 500);
 
             System.Console.ReadLine();
         }
@@ -42,11 +39,11 @@ namespace StocksAndBonds.Console
 
         private static void RunAIs(BoardSecurities securities)
         {
+            var model = GetRegressionMlModel();
+            var Elsa = new MLAi(DefaultStartingBalance, SecurityFactory.BoardSecurities2.Assets, model);
             var Tim = new MaximizeRrtAi(DefaultStartingBalance, MaxRounds, SecurityFactory.BoardSecurities2.Assets);
-            var Stompy = new YieldAi(DefaultStartingBalance);
-            var p1 = new MaximizeRrtAi(DefaultStartingBalance, MaxRounds, SecurityFactory.BoardSecurities2.Assets);
-            var p2 = new MostSharesAi(DefaultStartingBalance);
-            var players = new List<IAiPlayer>(){ Tim, Stompy, p1, p2 }; // InitializePlayers(DefaultStartingBalance);
+            var players = new List<IAiPlayer>(){ Tim, Elsa }; // InitializePlayers(DefaultStartingBalance);
+
             System.Console.WriteLine("===== Starting simulation of 'Stocks & Bonds' =====");
             foreach (var player in players)
             {
@@ -62,9 +59,8 @@ namespace StocksAndBonds.Console
         private static IList<IAiPlayer> InitializePlayers(int startingBalance)
         {
             var player1 = new MostSharesAi(startingBalance);
-            var player2 = new SteadyGrowthAi(startingBalance);
-            var player3 = new YieldAi(startingBalance);
-            var players = new List<IAiPlayer>() { player1, player2, player3 };
+            var player2 = new YieldAi(startingBalance);
+            var players = new List<IAiPlayer>() { player1, player2 };
 
             foreach (var asset in SecurityFactory.BoardSecurities)
             {
@@ -76,5 +72,40 @@ namespace StocksAndBonds.Console
 
             return players;
         }
+
+        private static PredictionEngine<Simulation, RateOfReturnPrediction> GetRegressionMlModel()
+        {
+            MLContext mlContext = new MLContext();
+
+            //Define DataViewSchema for data preparation pipeline and trained model
+            //DataViewSchema modelSchema;
+
+            // Load trained model
+            // If getting error about reflection, add a reference to the Microsoft.ML nuget library in the main MVC project
+            // https://stackoverflow.com/questions/51236784/ml-net-fails-to-load-a-model-from-storage-in-mvc-project
+            ITransformer trainedModel = mlContext.Model.Load(@"..\..\RrtRegressionModel.zip", out DataViewSchema modelSchema);
+
+            //// Create PredictionEngines
+            PredictionEngine<Simulation, RateOfReturnPrediction> predictionEngine = mlContext.Model.CreatePredictionEngine<Simulation, RateOfReturnPrediction>(trainedModel);
+
+            // >>>>>>>>>>>>>>>>>>>>>>> TEST EXAMPLE
+            //var simulationSample = new Simulation()
+            //{
+            //    Security = "Uranium",
+            //    Year = 11,
+            //    Price = 136,
+            //    Delta = 14,
+            //    IsSplit = false,
+            //    IsBust = false,
+            //    Yield = 6,
+            //    RateOfReturn = 0.163934426229508F // Predict this
+            //};
+            //RateOfReturnPrediction prediction = predictionEngine.Predict(simulationSample);
+            //System.Console.WriteLine($"Predicted:{prediction.RateOfReturn} Actual:{simulationSample.RateOfReturn}");
+            // <<<<<<<<<<<<<<<<<<<<<<<<
+
+            return predictionEngine;
+        }
     }
+
 }

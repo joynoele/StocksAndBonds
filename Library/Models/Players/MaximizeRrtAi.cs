@@ -13,27 +13,29 @@ namespace Library.Models.Players
         {
         }
 
-        public void TakeTurn(IList<Asset> assets, int year)
+        public void TakeTurn(IList<Asset> assets, int currentYear)
         {
-            UpdateLedger(assets, year);
+            UpdateLedger(assets, currentYear);
 
             // evaluate the securities based on calculations in the ledger
             var purchaseOrder = AnalysisTables
-                .Where(w => w.Value.AvgRateOfReturn[year-1] > 0)
-                .OrderByDescending(x => x.Value.AvgRateOfReturn[year-1])
-                .Select(y => y.Key);
-            Console.WriteLine($"{this.Name}'s top 3 picks: {purchaseOrder.First()}, {purchaseOrder.Skip(1).Take(1)}, {purchaseOrder.Skip(2).Take(1)}");
+                .Where(w => w.Value.AvgRateOfReturn[currentYear - 1] > 0)
+                .OrderByDescending(x => x.Value.AvgRateOfReturn[currentYear - 1]);
 
             // TODO: buy/sell
+            // TODO: call the cashout or sell all instead once access modifiers are figured out
+            foreach (var b in assets)
+            {
+                Sell(b);
+            }
+            Console.WriteLine($"{this.Name}'s top 3 picks: " +
+                $"{purchaseOrder.First().Key} ({purchaseOrder.First().Value.AvgRateOfReturn[currentYear-1]:p2}), " +
+                $"{purchaseOrder.Skip(1).Take(1).First().Key} ({purchaseOrder.Skip(1).Take(1).First().Value.AvgRateOfReturn[currentYear-1]:p2}), " +
+                $"{purchaseOrder.Skip(2).Take(1).First().Key} ({purchaseOrder.Skip(2).Take(1).First().Value.AvgRateOfReturn[currentYear-1]:p2})");
             foreach (var puchase in purchaseOrder)
             {
-                MaxBuy(puchase);
+                MaxBuy(puchase.Key);
             }
-        }
-
-        public void Observe(IList<Asset> securities, int year)
-        {
-            UpdateLedger(securities, year);
         }
     }
 }

@@ -17,6 +17,7 @@ namespace Library.Models.Players
         decimal CashOut(IList<Asset> securities);
         void SplitOwnedSecurity(Asset security);
         void ForfitBustSecurity(Asset security);
+        void SellAll(IList<Asset> sellingSecurities);
     }
 
     public abstract class Player : IPlayer
@@ -67,7 +68,7 @@ namespace Library.Models.Players
             }
         }
 
-        protected int MaxBuy(Asset purchaseSecurity)
+        protected internal int MaxBuy(Asset purchaseSecurity)
         {
             if (purchaseSecurity.CostPerShare <= 0) return 0; // cannot purchase shares that have $0 valuation
 
@@ -81,7 +82,7 @@ namespace Library.Models.Players
         /// </summary>
         /// <param name="purchaseSecurity"></param>
         /// <param name="purchaseBundle">Set of 10</param>
-        protected void Buy(Asset purchaseSecurity, int purchaseBundle)
+        protected internal void Buy(Asset purchaseSecurity, int purchaseBundle)
         {
             if (purchaseSecurity.CostPerShare <= 0) return; // cannot purchase shares that have $0 valuation
 
@@ -105,20 +106,21 @@ namespace Library.Models.Players
                 System.Console.WriteLine($"{Name} purchased {purchaseVolume} shares of {purchaseSecurity} for {cost}");
         }
 
-        protected void SellAll(IList<Asset> sellingSecurities)
+        // use public until I figure out the right access level for decendents farther down
+        public void SellAll(IList<Asset> sellingSecurities)
         {
             foreach (var b in sellingSecurities)
             {
                 Sell(b);
             }
         }
-        protected void Sell(Asset sellingSecurity)
+        protected internal void Sell(Asset sellingSecurity)
         {
             var sellQuantity = GetAsset(sellingSecurity).Quantity;
             Sell(sellingSecurity, sellQuantity);
         }
 
-        protected void Sell(Asset sellingSecurity, int sellQuantity)
+        protected internal void Sell(Asset sellingSecurity, int sellQuantity)
         {
             // TODO: check if we have this security at all
             if (GetAsset(sellingSecurity).Quantity < sellQuantity)
@@ -150,12 +152,12 @@ namespace Library.Models.Players
             Portfolio.First(s => s.Security.Id == asset.Id).Quantity = 0;
         }
 
-        protected PurchasedSecurity GetAsset(Asset findAsset)
+        protected internal PurchasedSecurity GetAsset(Asset findAsset)
         {
             return Portfolio.Where(x => x.Security.Id == findAsset.Id).FirstOrDefault();
         }
 
-        protected PurchasedSecurity GetAsset(Security findSecurity)
+        protected internal PurchasedSecurity GetAsset(Security findSecurity)
         {
             return Portfolio.Where(x => x.Security.Id == findSecurity.Id).FirstOrDefault();
         }

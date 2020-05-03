@@ -12,11 +12,6 @@ namespace Library.Models.Players
         {
         }
 
-        public void Observe(IList<Asset> securities, int year)
-        {
-            // do nothing
-        }
-
         public void TakeTurn(IList<Asset> securities, int year)
         {
             var securitiesByCost = CheapestSecurities(securities);

@@ -17,7 +17,7 @@ namespace Library.Models.Players
         public int[] ClosingPrice { get; private set; }
         public int[] PriceDelta { get; private set; }
         public int[] YieldRecieved { get; private set; }
-        public int[] YieldPercent { get; private set; }
+        public double[] YieldPercent { get; private set; }
         public double[] RateOfReturn { get; private set; }
         public double[] AvgRateOfReturn { get; private set; }
         public double[] StdDevofRateOfReturn { get; private set; }
@@ -29,59 +29,57 @@ namespace Library.Models.Players
             OpeningPrice = new int[maxYears + 1];
             ClosingPrice = new int[maxYears + 1];
             PriceDelta = new int[maxYears + 1];
-            YieldRecieved = new int[maxYears + 1]; 
-            YieldPercent = new int[maxYears + 1];
+            YieldRecieved = new int[maxYears + 1];
+            YieldPercent = new double[maxYears + 1];
             RateOfReturn = new double[maxYears + 1];
             AvgRateOfReturn = new double[maxYears + 1];
             StdDevofRateOfReturn = new double[maxYears + 1];
             MaximumLoss = new int[maxYears + 1];
+            OpeningPrice[0] = 100; // Per the game rules, this is a constant.
         }
 
-        public void AddData(Asset asset, int year)
+        public void AddData(Asset asset, int currentYear)
         {
-            if (year < OpeningPrice.Length)
-            {
-                OpeningPrice[year] = asset.CostPerShare;
-                YieldRecieved[year] = (int)asset.CollectYieldAmt;
-            }
+            int index = currentYear - 1; // allowance for the off-by-one in indexing vs year
+            // index fills in information as if the market has open and closed for the year
+            // and we are making calculations for what to buy at "closing" price
 
-            if (year < 1)
-                return;
-
-            // These pieces of data are only known/calculated by data revealed in the following year
-            // i.e. involve knowing last year's closing price
-            ClosingPrice[year - 1] = asset.CostPerShare;
-            PriceDelta[year - 1] = asset.CostChange;
-            RateOfReturn[year - 1] = CalculateRateOfReturn(asset, year);
-            AvgRateOfReturn[year - 1] = CalculateAvgRateOfReturn(year);
-            StdDevofRateOfReturn[year - 1] = CalculateStdDevOfRateOfReturn(year);
-            MaximumLoss[year - 1] = CalculateMaximumLoss(year);
-            YieldPercent[year - 1] = YieldRecieved[year - 1] / ClosingPrice[year - 1];
+            // The order of these calculations is importaint since latter depend on earlier values being populated
+            
+            ClosingPrice[index] = asset.CostPerShare;
+            PriceDelta[index] = asset.CostChange;
+            YieldRecieved[index] = (int)asset.CollectYieldAmt;
+            RateOfReturn[index] = CalculateRateOfReturn(asset, currentYear);
+            AvgRateOfReturn[index] = CalculateAvgRateOfReturn(currentYear);
+            StdDevofRateOfReturn[index] = CalculateStdDevOfRateOfReturn(currentYear);
+            MaximumLoss[index] = CalculateMaximumLoss(currentYear);
+            YieldPercent[index] = (double)YieldRecieved[index] / ClosingPrice[index];
+            if (currentYear < OpeningPrice.Length) OpeningPrice[currentYear] = asset.CostPerShare;
         }
-        private double CalculateRateOfReturn(Asset asset, int year)
+        private double CalculateRateOfReturn(Asset asset, int populateYear)
         {
             if (asset.IsBust)
                 return -1;
 
             int splitMultiplier = asset.IsSplit ? 2 : 1;
-            return (splitMultiplier * (OpeningPrice[year-1] + PriceDelta[year-1] + YieldRecieved[year-1]) / (double)OpeningPrice[year-1]) - 1;
+            return (splitMultiplier * (OpeningPrice[populateYear - 1] + PriceDelta[populateYear - 1] + YieldRecieved[populateYear - 1]) / (double)OpeningPrice[populateYear - 1]) - 1;
         }
 
-        private double CalculateAvgRateOfReturn(int year)
+        private double CalculateAvgRateOfReturn(int populateYear)
         {
-            if (!RateOfReturn.Take(year).Any())
+            if (!RateOfReturn.Take(populateYear).Any())
                 return 0;
-            return RateOfReturn.Take(year).Average();
+            return RateOfReturn.Take(populateYear).Average();
         }
-        private double CalculateStdDevOfRateOfReturn(int year)
+        private double CalculateStdDevOfRateOfReturn(int populateYear)
         {
-            if (!RateOfReturn.Take(year).Any())
+            if (!RateOfReturn.Take(populateYear).Any())
                 return 0;
-            return RateOfReturn.Take(year).StandardDeviation();
+            return RateOfReturn.Take(populateYear).StandardDeviation();
         }
-        private int CalculateMaximumLoss(int year)
+        private int CalculateMaximumLoss(int populateYear)
         {
-            if (!PriceDelta.Take(year).Any())
+            if (!PriceDelta.Take(populateYear).Any())
                 return 0;
             return PriceDelta.Min();
         }
@@ -91,11 +89,12 @@ namespace Library.Models.Players
             // inefficient, but whatevers...
             Console.WriteLine($"---------- {assetName}");
             Console.Write("Year     :\t0\t1\t2\t3\t4\t5\t6\t7\t8\t9\t10");
-            Console.Write("\nPrice    :");
-            foreach (int price in OpeningPrice.Take(upToYear)) Console.Write($"\t{price}");
-            Console.Write("\nPriceD   :");
-            // skip the first price change because year 0 does not fundamentally have one
+            Console.Write("\nOPrice   :");
+            foreach (int oprice in OpeningPrice.Take(upToYear)) Console.Write($"\t{oprice}");
+            Console.Write("\nDelta   :");
             foreach (int delta in PriceDelta.Take(upToYear)) Console.Write($"\t{delta}");
+            Console.Write("\nCPrice   :");
+            foreach (int cprice in ClosingPrice.Take(upToYear)) Console.Write($"\t{cprice}");
             Console.Write("\nYield    :");
             foreach (int yield in YieldRecieved.Take(upToYear)) Console.Write($"\t{yield}");
             Console.Write("\nRrt      :");
@@ -106,6 +105,9 @@ namespace Library.Models.Players
             foreach (double stdDevRrt in StdDevofRateOfReturn.Take(upToYear)) Console.Write($"\t{stdDevRrt:p2}");
             Console.Write("\nMaxLoss  :");
             foreach (int maxLoss in MaximumLoss.Take(upToYear)) Console.Write($"\t{maxLoss}");
+            Console.Write("\nMaxLoss  :");
+            foreach (int maxLoss in MaximumLoss.Take(upToYear)) Console.Write($"\t{maxLoss}");
+            // TODO: add in avg price delta, std dev of price delta, and yield %
             Console.WriteLine();
         }
     }

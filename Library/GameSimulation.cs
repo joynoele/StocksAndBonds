@@ -20,7 +20,7 @@ namespace Library
             _maxRounds = rounds;
             _boardSecurities = boardSecurities;
             _die = die;
-            _players = players ?? new List<IAiPlayer>(){};
+            _players = players ?? new List<IAiPlayer>() { };
         }
 
         public void CaptureSecurityBehavior_Regression(string writeLocation, int simulationRuns)
@@ -29,17 +29,15 @@ namespace Library
             StockBoard board = new StockBoard(_boardSecurities);
             using (StreamWriter writer = new StreamWriter(writeLocation))
             {
-                writer.WriteLine("Run,Security,Year,Price,Delta,IsSplit,IsBust,Yield,ReturnOnInvestment,RateOfReturn");
+                writer.WriteLine("Run,Security,Year,Price,Delta,IsSplit,IsBust,Yield,RateOfReturn");
                 for (int run = 1; run <= simulationRuns; run++)
                 {
-                    board.Initialize();
-                    board.AdvanceYear(RollD6(1), RollD6(2)); // Setup the board for buying round 1; return on investments can only be calculated after the first buying round
+                    board.Initialize(RollD6(1), RollD6(2));
                     Console.Write($"\nRunning simulation {run} of {simulationRuns}");
 
                     while (board.Year <= _maxRounds)
                     {
                         Console.Write($"..{board.Year}");
-                        board.AdvanceYear(RollD6(1), RollD6(2));
                         foreach (var boardSecurity in board.BoardSecurities)
                         {
                             /*
@@ -68,29 +66,24 @@ namespace Library
                             {
                                 rrt = 0;
                                 Console.WriteLine($"Attempted to divide by zero ({boardSecurity.Name})\n");
-                            } //finally
-                            //{
-                                //if (Double.IsInfinity(rrt))
-                                //{
-                                //    rrt = -1;
-                                //    Console.WriteLine($"rrt was infinite ({boardSecurity.Key.Name})\n");
-                                //}
-                            //}
-                            writer.WriteLine($"{run},{boardSecurity.ShortName},{board.Year},{boardSecurity.CostPerShare},{boardSecurity.CostChange},{boardSecurity.IsSplit},{boardSecurity.IsBust},{boardSecurity.CollectYieldAmt},{r},{rrt}");
+                            }
+                            writer.WriteLine($"{run},{boardSecurity.ShortName},{board.Year},{boardSecurity.CostPerShare},{boardSecurity.CostChange},{boardSecurity.IsSplit},{boardSecurity.IsBust},{boardSecurity.CollectYieldAmt},{rrt}");
                         }
+                        board.AdvanceBoardYear(RollD6(1), RollD6(2));
                     }
-                } 
+                }
             }
             Console.WriteLine("====== completed ======");
         }
 
         public void PlayAiSimulation()
-        { 
+        {
             var board = new StockBoard(_boardSecurities);
-            foreach (var ai in _players) ai.Observe(board.BoardSecurities.Assets, board.Year);
-            do
+            var tempRoll = RollD6(2);
+
+            while (board.Year < _maxRounds)
             {
-                Console.WriteLine($"\n======= YEAR {board.Year} of {_maxRounds} ======");
+                Console.WriteLine($"\n======= YEAR {board.Year+1} of {_maxRounds} ======");
                 AdvanceRound(board);
                 Console.WriteLine($"--------------");
 
@@ -109,10 +102,12 @@ namespace Library
                 }
 
                 Console.ReadLine();
-            } while (board.Year <= _maxRounds);
+            } 
 
-                // One last round to see how all investments paid off
-                AdvanceRound(board);
+            // One last round to see how all investments paid off
+            Console.WriteLine($"\n======= CLOSING ======");
+            AdvanceRound(board);
+            Console.WriteLine($"--------------");
             foreach (var player in _players)
             {
                 player.CashOut(board.BoardSecurities.Assets);
@@ -133,7 +128,7 @@ namespace Library
 
             // Change prices
             var tempRoll = RollD6(2);
-            board.AdvanceYear(RollD6(1), tempRoll);
+            board.AdvanceBoardYear(RollD6(1), tempRoll);
             if (board.BoardMarket == MarketDirection.Bull)
                 Console.WriteLine($"+++ Rolled {tempRoll} on {board.BoardMarket} market +++");
             else

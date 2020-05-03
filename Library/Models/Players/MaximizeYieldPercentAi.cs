@@ -30,9 +30,5 @@ namespace Library.Models.Players
             }
         }
 
-        public void Observe(IList<Asset> securities, int year)
-        {
-            UpdateLedger(securities, year);
-        }
     }
 }
