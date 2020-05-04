@@ -14,12 +14,12 @@ namespace Library.Models.Players
 
     public class MLAi : Player, IMLAi
     {
-        private static string strategy = "Drawing on years of experience";
+        private static string strategy = "Drawing on lots of experience";
         private PredictionEngine<Simulation, RateOfReturnPrediction> PredictionEngine;
         private IDictionary<Asset, float?> GuessBook; // nullable in case the prediction engine does not have a prediction
 
         public MLAi(int initialBalance, IEnumerable<Asset> assetsInPlay, PredictionEngine<Simulation, RateOfReturnPrediction> predictionEngine)
-            : base("MachineLearning", initialBalance, strategy)
+            : base("ML_MaxReturn", initialBalance, strategy)
         {
             PredictionEngine = predictionEngine;
             GuessBook = new Dictionary<Asset, float?>();
@@ -45,7 +45,7 @@ namespace Library.Models.Players
                         Yield = (float)asset.CollectYieldAmt,
                     };
                     var prediction = PredictionEngine.Predict(situation);
-                    GuessBook[asset] = prediction.RateOfReturn;
+                    GuessBook[asset] = prediction.AvgRateOfReturn;
                     //System.Console.WriteLine($"\t{asset} Predicted:{prediction.RateOfReturn:p2}");
                 }
             }

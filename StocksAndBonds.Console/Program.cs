@@ -77,28 +77,25 @@ namespace StocksAndBonds.Console
         {
             MLContext mlContext = new MLContext();
 
-            //Define DataViewSchema for data preparation pipeline and trained model
-            //DataViewSchema modelSchema;
-
-            // Load trained model
             // If getting error about reflection, add a reference to the Microsoft.ML nuget library in the main MVC project
             // https://stackoverflow.com/questions/51236784/ml-net-fails-to-load-a-model-from-storage-in-mvc-project
             ITransformer trainedModel = mlContext.Model.Load(@"..\..\RrtRegressionModel.zip", out DataViewSchema modelSchema);
 
-            //// Create PredictionEngines
+            // Create PredictionEngines
             PredictionEngine<Simulation, RateOfReturnPrediction> predictionEngine = mlContext.Model.CreatePredictionEngine<Simulation, RateOfReturnPrediction>(trainedModel);
 
             // >>>>>>>>>>>>>>>>>>>>>>> TEST EXAMPLE
+            // 204,Tri - City,7,107,20,False,False,0,0.117538302357605
             //var simulationSample = new Simulation()
             //{
-            //    Security = "Uranium",
-            //    Year = 11,
-            //    Price = 136,
-            //    Delta = 14,
+            //    Security = "Tri - City",
+            //    Year = 7,
+            //    Price = 107,
+            //    Delta = 1,
             //    IsSplit = false,
             //    IsBust = false,
-            //    Yield = 6,
-            //    RateOfReturn = 0.163934426229508F // Predict this
+            //    Yield = ,
+            //    AvgRateOfReturn = 0.117538302357605F // Predict this
             //};
             //RateOfReturnPrediction prediction = predictionEngine.Predict(simulationSample);
             //System.Console.WriteLine($"Predicted:{prediction.RateOfReturn} Actual:{simulationSample.RateOfReturn}");

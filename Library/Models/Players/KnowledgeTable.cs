@@ -62,7 +62,7 @@ namespace Library.Models.Players
                 return -1;
 
             int splitMultiplier = asset.IsSplit ? 2 : 1;
-            return (splitMultiplier * (OpeningPrice[populateYear - 1] + PriceDelta[populateYear - 1] + YieldRecieved[populateYear - 1]) / (double)OpeningPrice[populateYear - 1]) - 1;
+            return ((splitMultiplier * (ClosingPrice[populateYear-1] + YieldRecieved[populateYear-1]) / (double)OpeningPrice[populateYear-1])) - 1;
         }
 
         private double CalculateAvgRateOfReturn(int populateYear)

@@ -9,7 +9,7 @@ namespace Library.Models.Players
     {
         
         public MaximizeRrtAi(int initialBalance, int maxYears, IEnumerable<Asset> assetsInPlay) 
-            : base(initialBalance, "MaxRrt", null, maxYears, assetsInPlay)
+            : base(initialBalance, "MaxReturn", null, maxYears, assetsInPlay)
         {
         }
 

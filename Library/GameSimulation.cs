@@ -29,45 +29,34 @@ namespace Library
             StockBoard board = new StockBoard(_boardSecurities);
             using (StreamWriter writer = new StreamWriter(writeLocation))
             {
-                writer.WriteLine("Run,Security,Year,Price,Delta,IsSplit,IsBust,Yield,RateOfReturn");
+                writer.WriteLine("Run,Security,Year,Price,Delta,IsSplit,IsBust,Yield,AvgRateOfReturn");
                 for (int run = 1; run <= simulationRuns; run++)
                 {
+                    var analysisTables = new Dictionary<Asset, KnowledgeTable>();
+                    foreach (var asset in board.BoardSecurities)
+                    {
+                        analysisTables.Add(asset, new KnowledgeTable(_maxRounds));
+                    }
+
                     board.Initialize(RollD6(1), RollD6(2));
                     Console.Write($"\nRunning simulation {run} of {simulationRuns}");
 
-                    while (board.Year <= _maxRounds)
+                    while (board.Year < _maxRounds+1)
                     {
                         Console.Write($"..{board.Year}");
                         foreach (var boardSecurity in board.BoardSecurities)
                         {
-                            /*
-                             * SplitMultiplier,s=1|2, accounts for where the stock has split
-                             * Return,r = s*yield + costChange [e.g. purchased 1 unit for $100, sold for $110 + $2 yield = $12 return]
-                             * Rate of Return,rrt = return/(s*cost - costChange) [e.g. above example would be $12/100 = 12%]
-                             */
-                            var s = boardSecurity.IsSplit ? 2 : 1;
-                            decimal r = 0;
-                            decimal rrt = 0;
-                            try
-                            {
-                                if (boardSecurity.IsBust)
-                                {
-                                    // Because a busted security gets reset right away, we need to ignore the currently posted price/price changes
-                                    r = -boardSecurity.CostChange;
-                                    rrt = -1;
-                                }
-                                else
-                                {
-                                    r = (s * boardSecurity.CollectYieldAmt) + boardSecurity.CostChange;
-                                    rrt = r / ((s * boardSecurity.CostPerShare) - boardSecurity.CostChange);
-                                }
-                            }
-                            catch (DivideByZeroException)
-                            {
-                                rrt = 0;
-                                Console.WriteLine($"Attempted to divide by zero ({boardSecurity.Name})\n");
-                            }
-                            writer.WriteLine($"{run},{boardSecurity.ShortName},{board.Year},{boardSecurity.CostPerShare},{boardSecurity.CostChange},{boardSecurity.IsSplit},{boardSecurity.IsBust},{boardSecurity.CollectYieldAmt},{rrt}");
+                            var assetTable = analysisTables[boardSecurity];
+                            assetTable.AddData(boardSecurity, board.Year);
+                            writer.WriteLine(string.Join(",", run,
+                                boardSecurity.ShortName, 
+                                board.Year,
+                                assetTable.ClosingPrice[board.Year-1],
+                                assetTable.PriceDelta[board.Year-1],
+                                boardSecurity.IsSplit,
+                                boardSecurity.IsBust,
+                                assetTable.YieldRecieved[board.Year-1],
+                                assetTable.AvgRateOfReturn[board.Year-1]));
                         }
                         board.AdvanceBoardYear(RollD6(1), RollD6(2));
                     }
@@ -83,7 +72,7 @@ namespace Library
 
             while (board.Year < _maxRounds)
             {
-                Console.WriteLine($"\n======= YEAR {board.Year+1} of {_maxRounds} ======");
+                Console.WriteLine($"\n======= YEAR {board.Year + 1} of {_maxRounds} ======");
                 AdvanceRound(board);
                 Console.WriteLine($"--------------");
 
@@ -102,7 +91,7 @@ namespace Library
                 }
 
                 Console.ReadLine();
-            } 
+            }
 
             // One last round to see how all investments paid off
             Console.WriteLine($"\n======= CLOSING ======");

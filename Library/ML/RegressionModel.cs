@@ -36,12 +36,12 @@ namespace Library.ML
 
         [LoadColumn(9)]
         [ColumnName("Label")]
-        public float RateOfReturn;
+        public float AvgRateOfReturn;
     }
 
     public class RateOfReturnPrediction
     {
         [ColumnName("Score")]
-        public float RateOfReturn;
+        public float AvgRateOfReturn;
     }
 }
