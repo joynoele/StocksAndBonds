@@ -123,7 +123,7 @@ namespace Library.Models.Players
         protected internal void Sell(Asset sellingSecurity, int sellQuantity)
         {
             // TODO: check if we have this security at all
-            if (GetAsset(sellingSecurity).Quantity < sellQuantity)
+            if (GetAsset(sellingSecurity)?.Quantity < sellQuantity)
             {
                 // Not enough of this sellingSecurities to do this transaction
                 return;
@@ -154,12 +154,14 @@ namespace Library.Models.Players
 
         protected internal PurchasedSecurity GetAsset(Asset findAsset)
         {
-            return Portfolio.Where(x => x.Security.Id == findAsset.Id).FirstOrDefault();
+            // Caution when using .First() in case the security has been removed out from underneath the collection, in a future async environment.
+            return Portfolio.Where(x => x.Security.Id == findAsset.Id).First();
         }
 
         protected internal PurchasedSecurity GetAsset(Security findSecurity)
         {
-            return Portfolio.Where(x => x.Security.Id == findSecurity.Id).FirstOrDefault();
+            // Caution when using .First() in case the security has been removed out from underneath the collection, in a future async environment.
+            return Portfolio.Where(x => x.Security.Id == findSecurity.Id).First();
         }
     }
 }

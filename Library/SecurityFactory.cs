@@ -54,7 +54,8 @@ namespace Library
             using (StreamReader file = File.OpenText(jsonPath))
             {
                 JsonSerializer serializer = new JsonSerializer();
-                fromJson = (RawSecurities[])serializer.Deserialize(file, typeof(RawSecurities[]));
+                var temp = (RawSecurities[]?)serializer.Deserialize(file, typeof(RawSecurities[]));
+                fromJson = temp ?? throw new Exception("No securities found in file");
             }
 
             if (_securities == null)

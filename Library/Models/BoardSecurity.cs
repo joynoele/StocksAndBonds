@@ -7,12 +7,15 @@ namespace Library.Models
 
     public class BoardSecurity
     {
-        private const int StartingPrice = 100; // Set point when game is initialized or to reset the price after bottoming out
+        /// <summary>
+        /// Set point when game is initialized or to reset the price after bottoming out
+        /// </summary>
+        private const int StartingPrice = 100;
 
         public int CostPerShare { get; private set; }
         public bool IsSplit { get; private set; }
         public bool IsBust { get; private set; }
-        public Security Security { get; private set; }
+        //public Security Security { get; private set; }
         private decimal YieldPer10Shares; // { get; private set; }
         public int CostChange { get; private set; }
         public decimal CollectYieldAmt { get => !IsBust && CostPerShare > 30 ? YieldPer10Shares : 0; } // Securities that fall below a certain value ($30?) cannot have yield collected on them

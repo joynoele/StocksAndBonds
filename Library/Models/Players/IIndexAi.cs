@@ -7,6 +7,5 @@ namespace Library.Models.Players
     public interface IIndexAi : IAiPlayer
     {
         Security IndexSecurity { get; }
-        void PrintStatus();
     }
 }
