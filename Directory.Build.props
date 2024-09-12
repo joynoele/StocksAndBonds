@@ -1,0 +1,28 @@
+﻿<Project>
+	<!-- Common global variables and project settings -->
+	<PropertyGroup>
+		<!--nullable enabled by default, can be overriden per csproj-->
+		<DefaultNullable>enable</DefaultNullable>
+		<DefaultTargetFramework>net8.0</DefaultTargetFramework>
+		<!--https://docs.microsoft.com/en-us/dotnet/core/project-sdk/msbuild-props#implicitusings-->
+		<!--C# lang 10 might be able to be used, disable this for now as a default, can be overriden per csproj-->
+		<DefaultImplicitUsings>disable</DefaultImplicitUsings>
+		<ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+		<!--Useful for pinning certain dependancies that have certain changes. Looking at you Moq-->
+		<CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<AppendTargetFrameworkToOutputPath>true</AppendTargetFrameworkToOutputPath>
+		<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+		<EnableNETAnalyzers>true</EnableNETAnalyzers>
+		<AnalysisMode>AllEnabledByDefault</AnalysisMode>
+		<RunAnalyzersDuringBuild>true</RunAnalyzersDuringBuild>
+		<RunAnalyzersDuringLiveAnalysis>true</RunAnalyzersDuringLiveAnalysis>
+		<NeutralLanguage>en</NeutralLanguage>
+		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+		<NoWarn>$(NoWarn),CA1012,CA1051,CA1052,CA1062,CA1065,CA1303,CA1305,CA1707,CA1724,CA1725,CA1802,CA1822,CA1815,CA1851,CA1819,CA1859,CA2201,CA2227,CA5394</NoWarn>
+		<NoWarn>$(NoWarn),CS0103,CS0108,CS8600,CS8602,CS8603,CS8618,CS8625</NoWarn>
+	</PropertyGroup>
+  
+</Project>

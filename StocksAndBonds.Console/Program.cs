@@ -32,7 +32,7 @@ namespace StocksAndBonds.Console
 
         private static void SimulateStockPrices(BoardSecurities securities, int numberOfSimulations)
         {
-            string writePath = @"C:\tmp\StockPriceSimulation_" + DateTime.Now.ToString("yyyy_MM_dd") + ".csv";
+            string writePath = @"C:\temp\StockPriceSimulation_" + DateTime.Now.ToString("yyyy_MM_dd") + ".csv";
             GameSimulation game = new GameSimulation(MaxRounds, securities, new Random(), null);
             game.CaptureSecurityBehavior_Regression(writePath, numberOfSimulations);
         }
@@ -79,7 +79,7 @@ namespace StocksAndBonds.Console
 
             // If getting error about reflection, add a reference to the Microsoft.ML nuget library in the main MVC project
             // https://stackoverflow.com/questions/51236784/ml-net-fails-to-load-a-model-from-storage-in-mvc-project
-            ITransformer trainedModel = mlContext.Model.Load(@"..\..\RrtRegressionModel.zip", out DataViewSchema modelSchema);
+            ITransformer trainedModel = mlContext.Model.Load(@"..\..\..\..\RrtRegressionModel.zip", out DataViewSchema modelSchema);
 
             // Create PredictionEngines
             PredictionEngine<Simulation, RateOfReturnPrediction> predictionEngine = mlContext.Model.CreatePredictionEngine<Simulation, RateOfReturnPrediction>(trainedModel);
