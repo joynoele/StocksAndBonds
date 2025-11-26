@@ -13,7 +13,7 @@ using System.IO;
 
 namespace StocksAndBonds.Console
 {
-    public class Program
+    internal sealed class Program
     {
         private static readonly int DefaultStartingBalance = 5000;
         private static int MaxRounds = 10;
@@ -40,9 +40,13 @@ namespace StocksAndBonds.Console
         private static void RunAIs(BoardSecurities securities)
         {
             var model = GetRegressionMlModel();
-            var Elsa = new MLAi(DefaultStartingBalance, SecurityFactory.BoardSecurities2.Assets, model);
-            var Tim = new MaximizeRrtAi(DefaultStartingBalance, MaxRounds, SecurityFactory.BoardSecurities2.Assets);
-            var players = new List<IAiPlayer>(){ Tim, Elsa }; // InitializePlayers(DefaultStartingBalance);
+            
+            // Individual players
+            //var Elsa = new MLAi(DefaultStartingBalance, SecurityFactory.BoardSecurities2.Assets, model);
+            //var Tim = new MaximizeRrtAi(DefaultStartingBalance, MaxRounds, SecurityFactory.BoardSecurities2.Assets);
+            //var players = new List<IAiPlayer>(){ Tim, Elsa };
+            // Predefined list of players
+            var players = InitializePlayers(DefaultStartingBalance);
 
             System.Console.WriteLine("===== Starting simulation of 'Stocks & Bonds' =====");
             foreach (var player in players)

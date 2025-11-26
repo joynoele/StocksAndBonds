@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>$(DefaultTargetFramework)</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
 	<Nullable>$(DefaultNullable)</Nullable>
 	<AssemblyName>StocksAndBonds.Library</AssemblyName>
 	<RootNamespace>Libarary</RootNamespace>
